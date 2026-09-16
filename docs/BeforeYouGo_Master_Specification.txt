@@ -1,0 +1,305 @@
+BEFOREYOUGO — MASTER PRODUCT AND ENGINEERING SPECIFICATION
+Version: 1.0 (planning document)
+Language: English
+Platform: Native Android, Kotlin, Android Studio
+Status: Requirements and implementation plan, not a claim of completed features
+
+======================================================================
+1. PRODUCT VISION
+======================================================================
+BeforeYouGo is a lightweight, offline-first daily anti-forgetfulness companion for a broad audience. Users record things they do not want to forget, receive a configurable morning reminder, and confirm their essentials before leaving. The core experience must require no trip, exam, work, or travel category; no calendar event; no account; and no backend.
+
+Product promise: "Write it down now. Remember it before you go."
+
+Core loop:
+A. During the day or evening, capture an item in a few seconds (e.g., "Bring the signed document tomorrow").
+B. At the configured morning time, receive a gentle notification when notifications are enabled and the OS permits delivery.
+C. Open Today and see permanent essentials plus today's special items.
+D. Confirm items individually, postpone a one-off item, or archive it.
+E. On the next applicable day, recurring essentials are available again; completed one-off items do not reappear.
+
+The app never claims to sense whether an object is physically in a bag. A checkmark means the user confirmed it.
+
+======================================================================
+2. PRODUCT PRINCIPLES AND NON-GOALS
+======================================================================
+- Universal and personal: no required presets or event categories.
+- Fast capture: minimal fields and taps; the primary action is always visible.
+- Quiet by default: configurable notification time and active days, no nagging loops.
+- Offline-first: all core flows work without Internet.
+- Accessible: clear wording, large touch targets, TalkBack labels, scalable text.
+- Honest: do not promise exact delivery times or physical item detection.
+- Privacy-first: no account, analytics, ads, or remote storage in MVP.
+- Recoverable: no silent loss of pending one-off items.
+
+Out of scope for MVP: generative AI, location monitoring, Bluetooth item detection, shared lists, multi-device sync, paid plans, compulsory work/exam/travel templates, gamification, and behavioral scoring.
+
+======================================================================
+3. TARGET USERS AND KEY USER STORIES
+======================================================================
+Any smartphone user who occasionally forgets belongings or one-off errands, including users who prefer simple interfaces. Do not frame the product as diagnosing or treating any condition.
+
+US-01: As a new user, I can choose suggested essentials and add my own.
+US-02: As a user, I can add "bring a document tomorrow" without creating an event.
+US-03: As a user, I can choose a different date for a one-off item.
+US-04: As a user, I can set morning reminder time and active weekdays.
+US-05: As a user, I can use the checklist even if notification permission is denied.
+US-06: As a user, I can confirm items one by one and undo mistakes.
+US-07: As a user, I can postpone an unfinished one-off item instead of losing it.
+US-08: As a user, I can edit or archive an item and see the change persist after restart.
+US-09: As a user, I can disable reminders and still use the app normally.
+US-10: As a user, I can use the app offline and with TalkBack.
+
+======================================================================
+4. MVP FEATURE REQUIREMENTS
+======================================================================
+4.1 Onboarding
+- A brief welcome screen explaining the product in plain language.
+- Optional starter suggestions (keys, phone, wallet, glasses, bag); no suggestion is mandatory.
+- Add custom essentials with name; reject blank names and handle duplicates gracefully.
+- Offer morning reminder configuration; ask Android notification permission in context, not immediately on first app launch without explanation.
+- Provide Skip; user can change all settings later.
+
+4.2 Essentials
+- Create, rename, archive, delete, reorder essentials.
+- Optional weekdays recurrence: default every day; support a seven-day selection.
+- Permanent essentials appear on each applicable local date with independent per-day confirmation.
+- Do not duplicate every recurring item into an unbounded number of database rows.
+- Archiving removes an item from future lists but retains existing history if history is enabled.
+
+4.3 One-off items
+- Quick-add text input on Today, default due date tomorrow when launched via "Don't forget tomorrow"; explicitly display the chosen date.
+- Allow Today, Tomorrow, or date picker; edit title and date later.
+- Status lifecycle: OPEN, COMPLETED, POSTPONED (date updated), ARCHIVED.
+- A due item not completed remains discoverable as overdue/pending; do not silently delete it at midnight.
+- Completion is explicit; optional undo available.
+- Avoid duplicate creation from repeated taps.
+
+4.4 Today
+- Show local date and greeting without assuming the user is departing at a particular time.
+- Two visually distinct sections: "My essentials" and "Especially today".
+- Display a progress count that reflects applicable items and user confirmations.
+- Individually toggle confirmation; do not offer a prominent one-tap "confirm all" shortcut.
+- Empty state explains how to add the first item.
+- Surface overdue one-off items separately with postpone/complete/archive actions.
+- Checklist is usable without any notification permission.
+
+4.5 Morning notification
+- User controls enabled state, local time, and weekdays.
+- Notification title example: "Good morning! Don't forget anything today."
+- Body may include a privacy-conscious summary such as "You have 2 special things to bring"; avoid displaying sensitive item text on the lock screen by default.
+- Tap opens Today; optional Snooze uses a user-selected delay.
+- Notification channel and runtime permission where required.
+- Handle denied permission, disabled channel, reboot, time/time-zone changes, daylight saving transitions, battery restrictions, and app update as appropriate.
+- WorkManager is appropriate for deferrable background work but cannot guarantee exact-minute alarms. Do not promise exact delivery. If precise scheduling becomes essential, evaluate AlarmManager and current OS/policy requirements separately.
+- No notification spam or duplicate alerts for a single intended reminder occurrence; persist deduplication state.
+
+4.6 Settings
+- Reminder enabled, time, active days, optional snooze interval.
+- Manage essentials and one-off items.
+- Simple privacy/about screen and notification troubleshooting.
+- Theme follows system initially; dark mode support.
+
+======================================================================
+5. NAVIGATION AND SCREENS
+======================================================================
+1. Onboarding: introduction, essentials selection, optional reminder setup.
+2. Today: primary home, daily progress, essentials, special items, quick add.
+3. Quick Add/Edit: title, item type, date or weekday recurrence; save/cancel.
+4. My Essentials: list, create, edit, reorder, archive.
+5. Pending Items: upcoming and overdue one-off items; complete/postpone/archive.
+6. Settings: notification schedule, permissions guidance, privacy/about.
+
+Prefer a small navigation surface: Today, Items, Settings. Quick Add is a clear prominent action. Use Material 3, edge-to-edge layouts where supported, proper system insets, keyboard handling, and meaningful loading/empty/error states. Do not make decorative buttons that do nothing.
+
+======================================================================
+6. TECHNICAL BASELINE AND ARCHITECTURE
+======================================================================
+- Native Kotlin in Android Studio; existing package in initialized project: com.toaandri.beforeyougo. Verify applicationId in app/build.gradle.kts before changing it. Once published, changing applicationId creates a different Play Store app.
+- Jetpack Compose + Material 3 for UI.
+- Single app Gradle module initially; Gradle Kotlin DSL and version catalog as present in the generated project.
+- MVVM presentation with ViewModel and StateFlow; repository interfaces; domain use cases for date/recurrence/confirmation rules.
+- Room for structured records; DataStore for small preferences.
+- Kotlin Coroutines/Flow for asynchronous database streams.
+- Dependency injection can start with manual wiring or Hilt; avoid premature modularization.
+- WorkManager for deferrable reminder work; notification channel and permission handling.
+- java.time types with explicit local-date semantics; inject Clock and ZoneId provider for deterministic tests.
+- Android Sharesheet/Storage Access Framework only if optional export is added later.
+
+Suggested package layout:
+com.toaandri.beforeyougo/
+  core/database/
+  core/notifications/
+  core/preferences/
+  core/ui/
+  data/local/
+  data/repository/
+  domain/model/
+  domain/repository/
+  domain/usecase/
+  feature/onboarding/
+  feature/today/
+  feature/items/
+  feature/settings/
+  MainActivity.kt
+
+Keep UI composables free of direct DAO calls and scheduling side effects. ViewModels invoke use cases; repositories own persistence. Use stable IDs rather than list indices as item identity.
+
+======================================================================
+7. DATA MODEL (PROPOSED ROOM SCHEMA)
+======================================================================
+EssentialItem:
+- id: UUID string or generated long primary key
+- title: nonblank string
+- active: boolean
+- weekdaysMask: integer, seven-day bitmask (default all days)
+- sortOrder: integer
+- createdAt: epoch milliseconds
+- updatedAt: epoch milliseconds
+
+DailyConfirmation:
+- id: primary key (or composite essentialId + localDate)
+- essentialId: foreign key to EssentialItem, deletion policy explicitly chosen
+- localDate: ISO yyyy-MM-dd local date
+- confirmed: boolean
+- confirmedAt: nullable epoch milliseconds
+- UNIQUE(essentialId, localDate)
+
+OneOffItem:
+- id: primary key
+- title: nonblank string
+- dueDate: ISO yyyy-MM-dd local date
+- status: OPEN | COMPLETED | ARCHIVED
+- createdAt, updatedAt: epoch milliseconds
+- completedAt: nullable epoch milliseconds
+- archivedAt: nullable epoch milliseconds
+
+ReminderDelivery:
+- id: primary key or UNIQUE(localDate, reminderType, scheduleVersion)
+- localDate, reminderType, scheduleVersion
+- deliveredAt: nullable epoch milliseconds
+- purpose: prevent duplicate intended reminders where feasible
+
+Preferences (DataStore):
+- onboardingCompleted
+- remindersEnabled
+- reminderLocalTime (hour/minute)
+- reminderWeekdaysMask
+- snoozeMinutes
+- optional privacy/lockscreen preference
+
+Do not store a full DailyEntry row for every essential on every future date. Generate today's list from EssentialItem recurrence and join existing DailyConfirmation rows. Date-specific one-offs are queried separately. A postponed one-off updates its dueDate and may optionally record a separate history event in a later version.
+
+Data constraints:
+- Use indices on OneOffItem(dueDate,status), DailyConfirmation(localDate), and recurrence lookup as appropriate.
+- Ensure updates to item status and audit metadata are transactional where necessary.
+- Add explicit Room migrations for schema changes; do not use destructive migrations in production.
+- Consider retention/export/deletion policy before storing long-term history.
+
+======================================================================
+8. BUSINESS RULES AND EDGE CASES
+======================================================================
+- "Today" is derived from device local date; use an injected clock and zone for tests.
+- Midnight rollover resets the visual confirmation of recurring essentials because confirmation is keyed by local date; it does not delete history.
+- A recurring essential is applicable only on selected weekdays.
+- Changing recurrence affects future applicable dates; do not silently rewrite past confirmations.
+- An unfinished one-off remains visible as overdue until completed, postponed, or archived.
+- Completing an item must be idempotent; undo must be possible where feasible.
+- When time zone changes, compute the next local scheduled reminder based on the new zone, with duplicate safeguards.
+- DST nonexistent/ambiguous times require a documented deterministic policy.
+- If the user changes reminder time or weekdays, cancel/replace obsolete work and increment schedule version.
+- If notifications are denied, show a non-blocking explanation and retain in-app functionality.
+- If device is rebooted, reconcile the next reminder using OS-supported mechanisms and app startup; test actual behavior.
+- Do not store raw sensitive item titles in notification extras unnecessarily.
+- No background location or microphone permissions.
+
+======================================================================
+9. UI/UX AND ACCESSIBILITY
+======================================================================
+- Primary CTA: quick-add item. One-off capture should take minimal taps.
+- No compulsory account, event creation, or categorization.
+- Make Today legible at a glance, with distinct recurring and special sections.
+- Use accessible content descriptions for icons, visible focus states, sufficient contrast, scalable typography, and touch targets appropriate for accessibility.
+- Support TalkBack announcements for item confirmation and clear labels for postpone/archive actions.
+- Support dark mode, system font scaling, keyboard navigation where relevant, and reduced motion preferences when animations are used.
+- Ask for permission only after explaining the benefit; provide Settings navigation for recovery.
+- Localize strings through Android resources; English and French are good initial locales if translation quality can be maintained.
+- No manipulative streaks, guilt messages, or excessive notifications.
+
+======================================================================
+10. TEST PLAN AND ACCEPTANCE CRITERIA
+======================================================================
+Unit tests:
+- Weekday recurrence across all seven days.
+- Daily confirmations independent across consecutive dates.
+- One-off item appears on due date, remains overdue, disappears after completion/archival.
+- Postponement moves item to chosen date without losing it.
+- Progress calculation excludes non-applicable items and correctly counts confirmations.
+- Date and time-zone changes; DST behavior for reminders.
+- Reminder rescheduling and deduplication logic.
+
+Room/integration tests:
+- DAO insert/update/delete and uniqueness constraints.
+- App restart preserves essentials, items, and confirmations.
+- Schema migrations preserve data.
+- Concurrent rapid taps do not create duplicate items or inconsistent states.
+
+Compose UI tests:
+- Onboarding with Skip.
+- Create/edit/archive essential.
+- Quick-add "document tomorrow" and find it on the correct date.
+- Confirm/unconfirm an essential.
+- Postpone overdue item.
+- Notification permission denied: app remains usable.
+- Large font and accessibility semantics.
+
+Manual device matrix:
+- At least two supported Android API levels and a physical phone if possible.
+- Offline/airplane mode.
+- Notification channel disabled, permission denied, and battery optimizations.
+- App process killed and device reboot.
+- Locale change, time-zone change, midnight rollover, and date picker boundaries.
+
+MVP acceptance scenario:
+A first-time user installs the app, selects keys and wallet, adds "bring signed document" for tomorrow, configures a morning reminder, restarts the app, sees the correct items the next day, confirms each independently, and can postpone any uncompleted one-off. This must work without an account or Internet. Reminder timing is best-effort according to Android scheduling and permission constraints.
+
+======================================================================
+11. DEVELOPMENT ROADMAP AND GIT PRACTICES
+======================================================================
+Milestone 0: Existing Android project compiles; Git initialized; initial commit and GitHub remote established. Add README and this specification in a docs/ folder or repository root.
+Milestone 1: Navigation shell, theme, Today screen, onboarding mock flows, ViewModels.
+Milestone 2: Room schema, repositories, essentials CRUD, recurrence engine, daily confirmation persistence.
+Milestone 3: One-off quick-add, due dates, overdue handling, postpone/complete/archive.
+Milestone 4: DataStore settings, notifications, snooze, permission handling, scheduling reconciliation.
+Milestone 5: Tests, accessibility, French/English strings, performance, crash fixes.
+Milestone 6: Optional widget, import/export, beta testing, release preparation.
+
+Use small branches such as feature/today-screen, feature/essentials-room, feature/quick-add, feature/morning-reminder. Commit only compilable coherent changes where possible. Open PRs even when working solo to record decisions. Do not commit signing keys, local.properties, secrets, or personal user data.
+
+Definition of Done for a feature:
+- Compiles; no known crashes on primary flow.
+- Tests added for nontrivial business logic and passing.
+- Handles empty/error/permission-denied states.
+- Accessibility labels and string resources included.
+- Documentation updated when behavior or architecture changes.
+
+======================================================================
+12. GOOGLE PLAY RELEASE READINESS
+======================================================================
+- Verify unique branding and app name availability; avoid assuming the name is legally available.
+- Choose and retain a stable applicationId before first release.
+- Use a secure signing process and Google Play App Signing where appropriate; back up credentials securely and never commit them.
+- Build a release Android App Bundle (.aab), not just a debug APK.
+- Review the current target API, Play Console testing eligibility, content, privacy, data safety, and developer verification requirements at release time; these policies change.
+- Prepare accurate screenshots, icon, short/full description, support contact, and privacy policy/disclosures as applicable.
+- Test notifications on actual devices and avoid promising exact delivery if not guaranteed.
+- Review backup behavior and ensure it matches privacy disclosures.
+- Run internal/closed testing as required for the account and collect feedback before production.
+- Monitor crashes and user feedback after release using privacy-conscious methods.
+
+======================================================================
+13. GUIDANCE FOR A CODING ASSISTANT
+======================================================================
+Work incrementally in the existing repository. First inspect settings.gradle.kts, app/build.gradle.kts, version catalog, manifest, current package, Kotlin/Compose versions, and existing tests. Do not overwrite generated project configuration blindly or invent dependency versions. Implement one milestone at a time, keep Gradle sync/build green, and explain every permission added. Use the existing com.toaandri.beforeyougo package unless the developer explicitly changes it. Keep user-facing strings in resources. Do not add a backend, AI SDK, ads, analytics, or location permissions without explicit approval. Treat this document as intended behavior; verify Android API and Play policies against current official documentation before implementing release-sensitive functionality.
+
+END OF SPECIFICATION
