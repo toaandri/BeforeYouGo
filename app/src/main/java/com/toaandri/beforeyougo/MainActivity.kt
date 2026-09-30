@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
     } }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable private fun BeforeYouGoApp(requestNotifications: ((() -> Unit) -> Unit)) {
     val context = LocalContext.current; val store = remember { AppStore(context) }
     val saved = remember { mutableStateListOf<SavedItem>().also { it.addAll(store.items()) } }
