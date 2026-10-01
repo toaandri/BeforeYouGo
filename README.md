@@ -1,90 +1,69 @@
 # BeforeYouGo
 
-**Remember what matters before you leave.**
+**La petite checklist qui vérifie que vous n’oubliez rien avant de partir.**
 
-BeforeYouGo is an offline-first native Android app that helps people remember everyday essentials and one-off items. Capture a thought in seconds, receive a configurable morning reminder, and check your list before heading out.
+BeforeYouGo est une application Android native, simple et entièrement hors ligne. Elle permet d’enregistrer ses objets indispensables, d’ajouter des rappels pour une date précise et de consulter une liste à cocher avant de quitter la maison.
 
-> Project status: MVP implemented. The interface intentionally stays simple while the core daily-list workflow is usable offline.
+## Fonctionnalités
 
-## The idea
+- Créer des **essentiels quotidiens** : clés, portefeuille, lunettes, etc.
+- Ajouter des objets **ponctuels** à ne pas oublier à une date donnée.
+- Afficher une liste du jour réunissant les essentiels et les rappels en retard ou prévus aujourd’hui.
+- Cocher les objets déjà préparés.
+- Modifier ou supprimer les objets enregistrés.
+- Configurer ou désactiver une notification quotidienne à l’heure souhaitée.
+- Conserver toutes les données localement, sans compte, serveur ni connexion Internet.
 
-- **Everyday essentials:** Choose items such as keys, wallet, glasses, or anything personal. No mandatory categories.
-- **Don't forget tomorrow:** Quickly add an item for tomorrow or another date.
-- **Today's checklist:** See recurring essentials and date-specific reminders together; confirm items individually.
-- **Morning reminder:** Set your preferred time and active days; open today's checklist from the notification.
-- **Offline by default:** No account or server required for the core experience.
+## Utilisation
 
-The app records user confirmations; it cannot automatically verify that an object is physically present.
+1. Ouvrir l’onglet **Mes objets** puis sélectionner **Ajouter**.
+2. Laisser l’option « Essentiel quotidien » cochée pour un objet à prendre chaque jour.
+3. La décocher pour ajouter un rappel ponctuel et saisir sa date au format `AAAA-MM-JJ`.
+4. Dans **Aujourd’hui**, cocher les objets une fois prêts. Les rappels ponctuels cochés sont retirés de la liste.
+5. Dans **Réglages**, choisir une heure comme `08:00`, puis activer le rappel. Android demandera l’autorisation des notifications si nécessaire.
 
-## What works today
+## Prérequis
 
-1. Add, edit, and delete everyday essentials and dated one-off reminders.
-2. See a daily checklist that combines essentials with due and overdue one-off items.
-3. Keep daily check states and items on the device across app restarts.
-4. Complete a one-off item directly from today's list; it is then removed.
-5. Configure or disable a daily Android notification reminder (Android 13+ asks for notification permission).
-6. Work entirely offline with a small, accessible Compose UI.
+- Android Studio récent
+- JDK 11 ou plus récent
+- Un émulateur ou un appareil Android avec Android 8.0 (API 26) minimum
 
-**Not in the MVP:** AI, accounts, cloud sync, geofencing, mandatory trip/work/exam templates, ads, or subscriptions.
+## Lancer le projet
 
-## Tech stack
+1. Cloner le dépôt et ouvrir son dossier dans Android Studio.
+2. Attendre la synchronisation Gradle.
+3. Sélectionner la configuration `app` puis un appareil de test.
+4. Lancer l’application.
 
-- Kotlin, Android Studio, Gradle Kotlin DSL
-- Jetpack Compose and Material 3
-- SharedPreferences with JSON for the intentionally small, local MVP data set
-- Android AlarmManager and notification channels for the daily reminder
-- JUnit and Android/Compose instrumentation tests
-
-Implementation details and dependencies will be added as development progresses. Notification delivery timing depends on Android permissions, battery restrictions, and scheduling APIs.
-
-## Getting started
-
-1. Clone this repository.
-2. Open its root folder in a recent stable Android Studio version.
-3. Let Gradle sync; use the project's Gradle wrapper.
-4. Run the `app` configuration on an emulator or Android device.
-
-On Windows, a command-line debug build can be run from the repository root:
+Pour compiler depuis Windows :
 
 ```powershell
 .\gradlew.bat assembleDebug
 ```
 
-Do not commit `local.properties`, signing keys, passwords, or API secrets.
+L’APK est alors disponible dans `app/build/outputs/apk/debug/app-debug.apk`.
 
-## Proposed architecture
+Pour exécuter les tests unitaires :
 
-```text
-app/src/main/java/com/toaandri/beforeyougo/
-  core/          # database, notifications, preferences, shared UI
-  data/          # entities, DAOs, repository implementations
-  domain/        # models, recurrence and checklist rules, use cases
-  feature/       # today, essentials, quick-add, settings, onboarding
-  MainActivity.kt
+```powershell
+.\gradlew.bat testDebugUnitTest
 ```
 
-Start with one Gradle module and split modules only if complexity justifies it. Keep business logic independent of Compose for straightforward unit testing.
+## Choix techniques
 
-## Roadmap
+- Kotlin et Jetpack Compose avec Material 3
+- Stockage local dans `SharedPreferences` au format JSON, adapté au petit volume de données du MVP
+- `AlarmManager` et canaux de notification Android pour le rappel quotidien
+- Règles de checklist isolées et couvertes par un test unitaire
 
-- [x] Initialize Android Studio project and Git repository
-- [x] Establish README and project conventions
-- [x] Build Today screen and essentials management
-- [x] Implement local persistence and daily checklist rules
-- [x] Add one-off reminders and quick capture
-- [x] Add configurable daily notifications
-- [x] Add unit coverage for checklist recurrence rules
-- [ ] Add optional widget, backup/export, and beta testing
-- [ ] Prepare Play Store listing, privacy disclosures, signing, and release
+## Vie privée
 
-## Privacy and accessibility
+BeforeYouGo ne crée aucun compte et n’envoie aucune donnée : les listes et préférences restent sur l’appareil.
 
-The intended first release keeps personal lists on-device and requires no account. Do not add analytics or third-party SDKs without documenting their data practices. Support TalkBack, scalable text, adequate touch targets, and clear notification controls. Review the current Google Play requirements and Android target API requirements when preparing the release; these can change.
+## Limites actuelles
 
-## Contributing
+L’interface est volontairement rudimentaire. Le MVP ne comporte pas encore de synchronisation, widget, export/sauvegarde, report de rappel ni vérification automatique de la présence d’un objet.
 
-This project is in its initial development phase. Issues and pull requests can be discussed once contribution guidelines are published.
+## Licence
 
-## License
-
-No open-source license has been selected yet. Until one is added, the repository's contents are not automatically licensed for reuse.
+Aucune licence open source n’a encore été choisie. Les contenus de ce dépôt ne sont donc pas automatiquement autorisés à la réutilisation.
