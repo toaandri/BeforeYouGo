@@ -23,4 +23,6 @@ local.properties
 *.keystore
 keystore.properties
 /docs/
+!/docs/
+!/docs/PLAY_STORE_RELEASE.md
 /artwork/
