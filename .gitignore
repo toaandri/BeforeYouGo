@@ -25,4 +25,6 @@ keystore.properties
 /docs/
 !/docs/
 !/docs/PLAY_STORE_RELEASE.md
+!/docs/media/
+!/docs/media/**
 /artwork/

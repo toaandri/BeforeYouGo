@@ -1,78 +1,118 @@
 # BeforeYouGo
 
-**La petite checklist qui vérifie que vous n’oubliez rien avant de partir.**
+**A calm, personal departure routine for Android.**
 
-BeforeYouGo est une application Android native, simple et entièrement hors ligne. Elle permet d’enregistrer ses objets indispensables, d’ajouter des rappels pour une date précise et de consulter une liste à cocher avant de quitter la maison.
+BeforeYouGo helps people prepare the things they need before leaving home. Build a visual list of everyday essentials, create routines for work, school, sport, travel, or family life, and choose whether each routine should ring like an alarm or arrive as a quiet notification.
 
-## Fonctionnalités
+The app is offline-first: it has no account, no ads, no analytics, and no network dependency.
 
-- Créer des **essentiels quotidiens** : clés, portefeuille, lunettes, etc.
-- Ajouter des objets **ponctuels** à ne pas oublier à une date donnée.
-- Afficher une liste du jour réunissant les essentiels et les rappels en retard ou prévus aujourd’hui.
-- Cocher les objets déjà préparés.
-- Modifier ou supprimer les objets enregistrés.
-- Créer plusieurs routines : nom, heure, jours de la semaine, mode **Sonnerie** ou **Notification**, vibration et report de 5/10/15 minutes.
-- Associer une checklist à chaque départ, passer la prochaine occurrence et réactiver une routine.
-- Parcourir 36 objets du quotidien avec catégories, recherche et icônes conservées dans les listes.
-- Choisir une apparence claire, sombre ou synchronisée avec le système.
-- Conserver toutes les données localement, sans compte, serveur ni connexion Internet.
+<p align="center">
+  <img src="docs/media/everyday-catalog.png" width="320" alt="BeforeYouGo everyday object catalogue" />
+</p>
 
-## Utilisation
+## Product highlights
 
-1. Dans **Objets**, utiliser **Du quotidien** pour ajouter des idées, ou le **+** pour un objet personnel. Choisir son icône et, si besoin, une date avec le calendrier.
-2. Dans **Aujourd’hui**, sélectionner **Créer une alarme** : nommer le départ, toucher l’heure et choisir les jours, le mode d’alerte et les objets concernés. « Sonnerie » lance une alarme audible ; « Notification » affiche seulement un rappel discret avec les actions Ouvrir et Reporter.
-3. Dans **Réglages**, autoriser les notifications et les alarmes exactes Android. Les alarmes en attente d’autorisation sont signalées et ne sont pas présentées comme opérationnelles.
-4. Cocher les objets une fois prêts. Les objets ponctuels restent décochables le jour même, puis sont archivés au changement de jour s’ils ont été cochés.
-5. À la sonnerie, utiliser **Arrêter** ou **Reporter** dans la notification ou l’application. Une sonnerie dure au maximum deux minutes ; un essai dure dix secondes. Les notifications discrètes ne lancent pas de sonnerie et se contrôlent depuis la barre de notifications.
+- Create as many departure routines as you need.
+- Choose a name, time, and any combination of weekdays for every routine.
+- Select one of two delivery modes per routine:
+  - **Ring** plays an Android alarm sound, can vibrate, and offers Stop and Snooze controls.
+  - **Notification** sends a quiet reminder with Open and Snooze actions, without starting an alarm sound.
+- Pick an Android alarm sound, enable or disable vibration, and choose a 5, 10, or 15 minute snooze duration.
+- Select a routine-specific checklist or include all items that are due that day.
+- Skip only the next occurrence without disabling the recurring routine.
+- Browse and search 36 illustrated suggestions, grouped into Essentials, Work & Study, Well-being, Outings & Travel, and Sport & Family.
+- Create one-off items with a date, or recurring everyday items.
+- Use light, dark, or system-following appearance.
+- Recover scheduled routines after a reboot, app update, time change, or time-zone change.
 
-Chaque alarme se répète les jours choisis en heure locale. Les changements de fuseau et d’heure, les mises à jour et le redémarrage reprogramment les alarmes. Un téléphone éteint ne peut pas sonner ; après un arrêt forcé Android de l’application, la rouvrir. Le volume Alarme, les autorisations et les restrictions du fabricant restent applicables. Aucune permission plein écran n’est demandée.
+## How it works
 
-## Prérequis
+1. Open **Objects**. Add an item with the `+` button, or pick from **Everyday** suggestions.
+2. Open **Today** and select **Create alarm**.
+3. Name the routine, set its time, select weekdays, then choose **Ring** or **Notification**.
+4. Configure sound, vibration, snooze, and the checklist for that specific routine.
+5. In **Settings**, allow notifications and Android’s exact alarm access. The app clearly shows when either permission is missing.
 
-- Android Studio récent
-- JDK 11 ou plus récent
-- Un émulateur ou un appareil Android avec Android 8.0 (API 26) minimum
+An alarm sound automatically stops after two minutes. A sound preview lasts ten seconds. Quiet notification routines never start media playback or app-controlled vibration.
 
-## Lancer le projet
+## Visual design
 
-1. Cloner le dépôt et ouvrir son dossier dans Android Studio.
-2. Attendre la synchronisation Gradle.
-3. Sélectionner la configuration `app` puis un appareil de test.
-4. Lancer l’application.
+The interface uses a focused departure-ritual design: ink blue for time-critical information, jade for completion and primary actions, warm paper surfaces, and compact visual object cards. Icons are Material vectors, so they stay sharp at every Android density and work offline.
 
-Pour compiler depuis Windows :
+The catalogue screenshot above was captured from the Android build on a physical device. It is intentionally a real product screenshot rather than a mocked marketing image.
+
+## Technical overview
+
+| Area | Implementation |
+| --- | --- |
+| UI | Kotlin, Jetpack Compose, Material 3 |
+| Storage | Local `SharedPreferences` JSON; no backend or account |
+| Scheduling | `AlarmManager.setAlarmClock()` with exact-alarm access checked at runtime |
+| Ring mode | Short-lived foreground media playback service, alarm audio focus, vibration, wake lock, and auto-stop |
+| Notification mode | Quiet local notification with Open and Snooze actions |
+| Reliability | Re-schedules after boot, package replacement, time changes, time-zone changes, and exact-alarm access changes |
+| Minimum Android version | Android 8.0 / API 26 |
+| Target SDK | API 37 |
+
+## Run locally
+
+### Requirements
+
+- Android Studio or a compatible Android SDK installation
+- JDK 11 or newer
+- An Android 8.0+ device or emulator
+
+### Build and install
 
 ```powershell
 .\gradlew.bat assembleDebug
 ```
 
-L’APK est alors disponible dans `app/build/outputs/apk/debug/app-debug.apk`.
+The debug APK is created at `app/build/outputs/apk/debug/app-debug.apk`.
 
-Pour exécuter les tests unitaires :
+With a USB-debugging device connected:
 
 ```powershell
-.\gradlew.bat testDebugUnitTest
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb shell am start -n com.toaandri.beforeyougo/.MainActivity
 ```
 
-## Choix techniques
+### Verify
 
-- Kotlin et Jetpack Compose avec Material 3
-- Stockage local dans `SharedPreferences` au format JSON, adapté au petit volume de données du MVP
-- `AlarmManager` et canaux de notification Android pour le rappel quotidien
-- Règles de checklist isolées et couvertes par un test unitaire
+```powershell
+.\gradlew.bat testDebugUnitTest lintDebug
+.\gradlew.bat assembleDebugAndroidTest
+```
 
-## Vie privée
+The unit suite covers recurring schedules, skipped occurrences, custom checklists, daylight-saving transitions, and routine storage migration. Instrumented tests also cover alarm audio start/stop/snooze behaviour on a real device.
 
-BeforeYouGo ne crée aucun compte et n’envoie aucune donnée : les listes et préférences restent sur l’appareil.
+Avoid Gradle’s `connectedDebugAndroidTest` on a personal device with irreplaceable local data: some device-specific test runners uninstall the target application before testing. Install the debug and test APKs with `adb install -r` / `adb install -r -t` and run only the required instrumentation class instead.
 
-## Limites actuelles
+## Google Play release checklist
 
-Pas de synchronisation, widget ou détection automatique de la présence d’un objet. Les checklists partagent l’état « prêt » d’un objet pour la journée. La validation de publication Google Play et la matrice complète d’appareils restent à réaliser (voir `docs/PLAY_STORE_RELEASE.md`).
+Before publishing, complete these items in Play Console:
 
-## Tests sur un téléphone personnel
+1. **Create a production signing key** and keep it outside this repository. Build a signed Android App Bundle with `./gradlew bundleRelease`.
+2. **Create the store listing**: app name, short description, full description, contact email, 512 × 512 app icon, at least two phone screenshots, and a 1024 × 500 feature graphic.
+3. **Host the privacy policy** at a public URL, then add that URL to Play Console. A draft policy is available in [docs/PLAY_STORE_RELEASE.md](docs/PLAY_STORE_RELEASE.md).
+4. **Complete Data safety** accurately: the app does not collect or share data; user lists and routines remain on-device. Declare the local notification and alarm use truthfully.
+5. **Declare permissions and foreground service use**. The app uses notifications, exact alarms, vibration, boot rescheduling, wake lock, and a short `mediaPlayback` foreground service only when a user-created Ring routine fires. Provide the required Play Console declaration and demonstration for this foreground-service use.
+6. **Complete the content rating questionnaire**, select countries and pricing, and set the support email.
+7. **Upload to Internal testing first**, then test at least Android 8.0, Android 12+, and Android 13+ devices. Confirm notification permission, exact-alarm access, Ring mode, Notification mode, Snooze, reboot recovery, and time-zone changes.
+8. **Review every current Google Play policy before production rollout.** Exact-alarm and foreground-service policy requirements can change independently from Android APIs.
 
-Éviter `connectedDebugAndroidTest` sur un appareil contenant des données à conserver : selon le lanceur Gradle, l’application peut être désinstallée avant les tests. Compiler avec `assembleDebugAndroidTest`, puis installer les deux APK avec `adb install -r` (et `-t` pour l’APK de test), ouvrir l’application et utiliser `adb shell am instrument -w com.toaandri.beforeyougo.test/androidx.test.runner.AndroidJUnitRunner`. Ne pas utiliser l’option `-g` sur les appareils qui bloquent l’octroi automatique des permissions. Les tests de stockage utilisent des préférences isolées ; l’essai sonore temporaire restaure la liste des alarmes dans un bloc `finally`.
+The implementation release notes and the full pre-submission checklist are in [docs/PLAY_STORE_RELEASE.md](docs/PLAY_STORE_RELEASE.md).
 
-## Licence
+## Privacy
 
-Aucune licence open source n’a encore été choisie. Les contenus de ce dépôt ne sont donc pas automatiquement autorisés à la réutilisation.
+BeforeYouGo does not create accounts, send analytics, show ads, or use a server. Lists, routines, preferences, and completion states are stored only on the device. Android cloud backup and device-transfer backup are excluded for the app’s shared preferences.
+
+When a user enables a routine, the app may request notifications and Android’s exact-alarm special access. These are used only to deliver the selected local Ring or Notification routine. Users can revoke permissions or disable any routine at any time.
+
+## Current scope
+
+BeforeYouGo does not currently provide sync, widgets, exports, cloud backup, shared lists, or automatic physical-object detection. Completion state is shared by an object across the day’s applicable checklists.
+
+## License
+
+No open-source license has been selected yet. The repository contents are not automatically licensed for reuse.
