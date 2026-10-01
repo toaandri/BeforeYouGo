@@ -11,16 +11,21 @@ BeforeYouGo est une application Android native, simple et entièrement hors lign
 - Afficher une liste du jour réunissant les essentiels et les rappels en retard ou prévus aujourd’hui.
 - Cocher les objets déjà préparés.
 - Modifier ou supprimer les objets enregistrés.
-- Configurer ou désactiver une notification quotidienne à l’heure souhaitée.
+- Créer plusieurs routines : nom, heure, jours de la semaine, mode **Sonnerie** ou **Notification**, vibration et report de 5/10/15 minutes.
+- Associer une checklist à chaque départ, passer la prochaine occurrence et réactiver une routine.
+- Parcourir 36 objets du quotidien avec catégories, recherche et icônes conservées dans les listes.
+- Choisir une apparence claire, sombre ou synchronisée avec le système.
 - Conserver toutes les données localement, sans compte, serveur ni connexion Internet.
 
 ## Utilisation
 
-1. Ouvrir l’onglet **Mes objets** puis sélectionner **Ajouter**.
-2. Laisser l’option « Essentiel quotidien » cochée pour un objet à prendre chaque jour.
-3. La décocher pour ajouter un rappel ponctuel et saisir sa date au format `AAAA-MM-JJ`.
-4. Dans **Aujourd’hui**, cocher les objets une fois prêts. Les rappels ponctuels cochés sont retirés de la liste.
-5. Dans **Réglages**, choisir une heure comme `08:00`, puis activer le rappel. Android demandera l’autorisation des notifications si nécessaire.
+1. Dans **Objets**, utiliser **Du quotidien** pour ajouter des idées, ou le **+** pour un objet personnel. Choisir son icône et, si besoin, une date avec le calendrier.
+2. Dans **Aujourd’hui**, sélectionner **Créer une alarme** : nommer le départ, toucher l’heure et choisir les jours, le mode d’alerte et les objets concernés. « Sonnerie » lance une alarme audible ; « Notification » affiche seulement un rappel discret avec les actions Ouvrir et Reporter.
+3. Dans **Réglages**, autoriser les notifications et les alarmes exactes Android. Les alarmes en attente d’autorisation sont signalées et ne sont pas présentées comme opérationnelles.
+4. Cocher les objets une fois prêts. Les objets ponctuels restent décochables le jour même, puis sont archivés au changement de jour s’ils ont été cochés.
+5. À la sonnerie, utiliser **Arrêter** ou **Reporter** dans la notification ou l’application. Une sonnerie dure au maximum deux minutes ; un essai dure dix secondes. Les notifications discrètes ne lancent pas de sonnerie et se contrôlent depuis la barre de notifications.
+
+Chaque alarme se répète les jours choisis en heure locale. Les changements de fuseau et d’heure, les mises à jour et le redémarrage reprogramment les alarmes. Un téléphone éteint ne peut pas sonner ; après un arrêt forcé Android de l’application, la rouvrir. Le volume Alarme, les autorisations et les restrictions du fabricant restent applicables. Aucune permission plein écran n’est demandée.
 
 ## Prérequis
 
@@ -62,7 +67,11 @@ BeforeYouGo ne crée aucun compte et n’envoie aucune donnée : les listes et p
 
 ## Limites actuelles
 
-L’interface est volontairement rudimentaire. Le MVP ne comporte pas encore de synchronisation, widget, export/sauvegarde, report de rappel ni vérification automatique de la présence d’un objet.
+Pas de synchronisation, widget ou détection automatique de la présence d’un objet. Les checklists partagent l’état « prêt » d’un objet pour la journée. La validation de publication Google Play et la matrice complète d’appareils restent à réaliser (voir `docs/PLAY_STORE_RELEASE.md`).
+
+## Tests sur un téléphone personnel
+
+Éviter `connectedDebugAndroidTest` sur un appareil contenant des données à conserver : selon le lanceur Gradle, l’application peut être désinstallée avant les tests. Compiler avec `assembleDebugAndroidTest`, puis installer les deux APK avec `adb install -r` (et `-t` pour l’APK de test), ouvrir l’application et utiliser `adb shell am instrument -w com.toaandri.beforeyougo.test/androidx.test.runner.AndroidJUnitRunner`. Ne pas utiliser l’option `-g` sur les appareils qui bloquent l’octroi automatique des permissions. Les tests de stockage utilisent des préférences isolées ; l’essai sonore temporaire restaure la liste des alarmes dans un bloc `finally`.
 
 ## Licence
 
