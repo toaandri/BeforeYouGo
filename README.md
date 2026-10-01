@@ -88,21 +88,6 @@ The unit suite covers recurring schedules, skipped occurrences, custom checklist
 
 Avoid Gradle’s `connectedDebugAndroidTest` on a personal device with irreplaceable local data: some device-specific test runners uninstall the target application before testing. Install the debug and test APKs with `adb install -r` / `adb install -r -t` and run only the required instrumentation class instead.
 
-## Google Play release checklist
-
-Before publishing, complete these items in Play Console:
-
-1. **Create a production signing key** and keep it outside this repository. Build a signed Android App Bundle with `./gradlew bundleRelease`.
-2. **Create the store listing**: app name, short description, full description, contact email, 512 × 512 app icon, at least two phone screenshots, and a 1024 × 500 feature graphic.
-3. **Host the privacy policy** at a public URL, then add that URL to Play Console. A draft policy is available in [docs/PLAY_STORE_RELEASE.md](docs/PLAY_STORE_RELEASE.md).
-4. **Complete Data safety** accurately: the app does not collect or share data; user lists and routines remain on-device. Declare the local notification and alarm use truthfully.
-5. **Declare permissions and foreground service use**. The app uses notifications, exact alarms, vibration, boot rescheduling, wake lock, and a short `mediaPlayback` foreground service only when a user-created Ring routine fires. Provide the required Play Console declaration and demonstration for this foreground-service use.
-6. **Complete the content rating questionnaire**, select countries and pricing, and set the support email.
-7. **Upload to Internal testing first**, then test at least Android 8.0, Android 12+, and Android 13+ devices. Confirm notification permission, exact-alarm access, Ring mode, Notification mode, Snooze, reboot recovery, and time-zone changes.
-8. **Review every current Google Play policy before production rollout.** Exact-alarm and foreground-service policy requirements can change independently from Android APIs.
-
-The implementation release notes and the full pre-submission checklist are in [docs/PLAY_STORE_RELEASE.md](docs/PLAY_STORE_RELEASE.md).
-
 ## Privacy
 
 BeforeYouGo does not create accounts, send analytics, show ads, or use a server. Lists, routines, preferences, and completion states are stored only on the device. Android cloud backup and device-transfer backup are excluded for the app’s shared preferences.
