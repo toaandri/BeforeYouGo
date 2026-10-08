@@ -38,9 +38,10 @@ class AppStore(val context: Context) {
     fun alarms(): List<DepartureAlarm> {
         if (!prefs.contains("alarms_v2")) {
             val time = reminderHour().split(":").map { it.toIntOrNull() ?: 0 }
+            // Keep the original audible behavior when upgrading an existing reminder.
             val migrated = if (reminderEnabled()) listOf(DepartureAlarm(
                 id = 1, hour = time.first().coerceIn(0, 23), minute = (time.getOrNull(1) ?: 0).coerceIn(0, 59),
-                days = (1..7).toSet()
+                days = (1..7).toSet(), deliveryMode = DeliveryMode.RING
             )) else emptyList()
             saveAlarms(migrated)
             return migrated

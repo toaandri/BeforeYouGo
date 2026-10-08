@@ -58,11 +58,11 @@ class AlarmRingingService : Service() {
         })
         val notification = Notification.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.ic_alarm_notification).setContentTitle(if (preview) "Essai · ${alarm.name}" else alarm.name)
-            .setContentText("C’est le moment de préparer vos objets.")
+            .setContentText(if (preview) "Ça te va comme son ?" else "On fait le tour avant de filer ?")
             .setContentIntent(ReminderScheduler.openIntent(this, alarm.id)).setCategory(Notification.CATEGORY_ALARM)
             .setVisibility(Notification.VISIBILITY_PUBLIC).setOngoing(true)
-            .addAction(Notification.Action.Builder(null, "Arrêter", actionIntent(alarm.id, STOP)).build())
-            .apply { if (!preview) addAction(Notification.Action.Builder(null, "Reporter ${alarm.snoozeMinutes} min", actionIntent(alarm.id, SNOOZE)).build()) }
+            .addAction(Notification.Action.Builder(null, "Arrêter la sonnerie", actionIntent(alarm.id, STOP)).build())
+            .apply { if (!preview) addAction(Notification.Action.Builder(null, "Dans ${alarm.snoozeMinutes} min", actionIntent(alarm.id, SNOOZE)).build()) }
             .build()
         if (Build.VERSION.SDK_INT >= 29) startForeground(NOTIFICATION, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
         else startForeground(NOTIFICATION, notification)

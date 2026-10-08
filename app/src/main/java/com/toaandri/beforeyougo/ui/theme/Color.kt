@@ -2,13 +2,11 @@ package com.toaandri.beforeyougo.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Direction "calme avant le départ" — encre, jade, sable et ambre.
-val Ink = Color(0xFF102A43)
-val Jade = Color(0xFF16856A)
-val JadeLight = Color(0xFFBEEAD9)
-val Sand = Color(0xFFF7F3EB)
-val Paper = Color(0xFFFFFCF7)
-val Amber = Color(0xFFF2B84B)
-val Coral = Color(0xFFDF6C5E)
-val Night = Color(0xFF071D2B)
-val MintNight = Color(0xFF8EE3C5)
+// Papier, terre cuite et sauge : un carnet que l’on s’approprie.
+val Ink = Color(0xFF30251F)
+val Terracotta = Color(0xFFA64B35)
+val Sage = Color(0xFF56715B)
+val Sand = Color(0xFFF6F0E5)
+val Paper = Color(0xFFFFFAF2)
+val Amber = Color(0xFFDDAA56)
+val Night = Color(0xFF211C18)

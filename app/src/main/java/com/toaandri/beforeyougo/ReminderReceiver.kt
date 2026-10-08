@@ -16,6 +16,7 @@ object ReminderScheduler {
     const val EXTRA_ID = "alarm_id"
     private const val SNOOZE = "snoozed"
     const val ACTION_NOTIFICATION_SNOOZE = "notification_snooze"
+    const val ACTION_NOTIFICATION_DISMISS = "notification_dismiss"
     fun canSchedule(context: Context): Boolean = Build.VERSION.SDK_INT < 31 ||
         context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms()
 
@@ -29,6 +30,13 @@ object ReminderScheduler {
         context, 0, Intent(context, ReminderReceiver::class.java)
             .setData(Uri.parse("beforeyougo://notification/$id/snooze"))
             .putExtra(EXTRA_ID, id).putExtra("action", ACTION_NOTIFICATION_SNOOZE),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    fun notificationDismissIntent(context: Context, id: Long): PendingIntent = PendingIntent.getBroadcast(
+        context, 0, Intent(context, ReminderReceiver::class.java)
+            .setData(Uri.parse("beforeyougo://notification/$id/dismiss"))
+            .putExtra(EXTRA_ID, id).putExtra("action", ACTION_NOTIFICATION_DISMISS),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
@@ -87,11 +95,19 @@ object ReminderScheduler {
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val id = intent.getLongExtra(ReminderScheduler.EXTRA_ID, -1)
+        if (id < 0) return
+        if (intent.getStringExtra("action") == ReminderScheduler.ACTION_NOTIFICATION_DISMISS) {
+            // The next occurrence was scheduled when this invitation arrived.
+            // Dismissing it never checks objects, cancels a snooze or changes the routine.
+            context.getSystemService(NotificationManager::class.java).cancel(id.toInt())
+            return
+        }
         val store = AppStore(context)
         val alarm = store.alarms().find { it.id == id && it.enabled } ?: return
         if (intent.getStringExtra("action") == ReminderScheduler.ACTION_NOTIFICATION_SNOOZE) {
-            ReminderScheduler.snooze(context, alarm)
-            context.getSystemService(NotificationManager::class.java).cancel(id.toInt())
+            if (ReminderScheduler.snooze(context, alarm)) {
+                context.getSystemService(NotificationManager::class.java).cancel(id.toInt())
+            }
             return
         }
         if (intent.getBooleanExtra("snoozed", false)) store.setSnoozedUntil(id, 0)
@@ -109,20 +125,22 @@ class ReminderReceiver : BroadcastReceiver() {
     private fun showQuietNotification(context: Context, alarm: DepartureAlarm) {
         val manager = context.getSystemService(NotificationManager::class.java)
         val channel = "departure_reminder_v1"
-        manager.createNotificationChannel(NotificationChannel(channel, "Rappels BeforeYouGo", NotificationManager.IMPORTANCE_DEFAULT).apply {
-            description = "Rappels discrets de vos routines de départ"
+        manager.createNotificationChannel(NotificationChannel(channel, "Petits signes de départ", NotificationManager.IMPORTANCE_LOW).apply {
+            description = "Des invitations silencieuses à faire le tour avant de partir"
             setSound(null, null)
             enableVibration(false)
         })
         val notification = Notification.Builder(context, channel)
             .setSmallIcon(R.drawable.ic_alarm_notification)
-            .setContentTitle(alarm.name)
-            .setContentText("Votre checklist est prête à être vérifiée.")
+            .setContentTitle("On fait le tour ?")
+            .setContentText("${alarm.name} · Un petit tour et tu files.")
             .setContentIntent(ReminderScheduler.openIntent(context, alarm.id))
             .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
             .setCategory(Notification.CATEGORY_REMINDER)
-            .addAction(Notification.Action.Builder(null, "Ouvrir", ReminderScheduler.openIntent(context, alarm.id)).build())
-            .addAction(Notification.Action.Builder(null, "Reporter ${alarm.snoozeMinutes} min", ReminderScheduler.notificationSnoozeIntent(context, alarm.id)).build())
+            .addAction(Notification.Action.Builder(null, "Ouvrir mon départ", ReminderScheduler.openIntent(context, alarm.id)).build())
+            .addAction(Notification.Action.Builder(null, "Dans ${alarm.snoozeMinutes} min", ReminderScheduler.notificationSnoozeIntent(context, alarm.id)).build())
+            .addAction(Notification.Action.Builder(null, "Pas aujourd’hui", ReminderScheduler.notificationDismissIntent(context, alarm.id)).build())
             .build()
         manager.notify(alarm.id.toInt(), notification)
     }

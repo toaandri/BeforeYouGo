@@ -3,8 +3,14 @@ package com.toaandri.beforeyougo
 import android.content.Context
 import android.content.ContextWrapper
 import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import com.toaandri.beforeyougo.ui.theme.BeforeYouGoTheme
 import org.junit.Assert.*
@@ -22,7 +28,7 @@ class DepartureUiTest {
             }
         }
         compose.onNodeWithText("Mar", useUnmergedTree = true).performScrollTo().performClick()
-        compose.onNodeWithText("Enregistrer l’alarme").performClick()
+        compose.onNodeWithText("Enregistrer ce départ").performClick()
         compose.runOnIdle { assertEquals(setOf(1, 2), result!!.days); assertEquals("Sport", result!!.name) }
     }
 
@@ -35,11 +41,58 @@ class DepartureUiTest {
                 })
             }
         }
-        compose.onNodeWithText("Du quotidien").performClick()
+        compose.onNodeWithText("Piocher des idées").performClick()
         compose.onNodeWithText("Rechercher un objet").performTextInput("parapluie")
         compose.onNodeWithText("Parapluie").performClick()
-        compose.onNodeWithText("✓ Dans mes objets").assertExists()
+        compose.onNodeWithText("✓ Dans ma collection").assertExists()
         compose.runOnIdle { assertEquals("umbrella", selected.value.single().iconKey) }
+    }
+
+    @Test fun packingIsReversibleAndLeavingDoesNotCheckOtherItems() {
+        var checks by mutableStateOf<Map<Long, Boolean>>(emptyMap())
+        var left = false
+        val items = listOf(SavedItem(1, "Clés", true, null), SavedItem(2, "Gourde", true, null))
+        compose.setContent {
+            BeforeYouGoTheme {
+                Column(Modifier.width(320.dp).verticalScroll(rememberScrollState())) {
+                    DepartureRitual(items, checks, { id, checked -> checks = checks + (id to checked) }, {}, { left = true })
+                }
+            }
+        }
+        compose.onNodeWithTag("pack-1").performScrollTo().performClick().assertIsOn()
+        compose.onNodeWithTag("pack-1").performClick().assertIsOff()
+        compose.onNodeWithTag("pack-2").assertIsOff()
+        compose.onNodeWithText("Je file !").performScrollTo().performClick()
+        compose.runOnIdle { assertTrue(left); assertFalse(checks.values.any { it }) }
+    }
+
+    @Test fun draggingOnlyConfirmsWhenReleasedInsideTheBag() {
+        var checks by mutableStateOf<Map<Long, Boolean>>(emptyMap())
+        compose.setContent {
+            BeforeYouGoTheme {
+                Column(Modifier.width(320.dp).verticalScroll(rememberScrollState())) {
+                    DepartureRitual(listOf(SavedItem(1, "Clés", true, null)), checks,
+                        { id, checked -> checks = checks + (id to checked) }, {}, {})
+                }
+            }
+        }
+        val tile = compose.onNodeWithTag("pack-1")
+        tile.performTouchInput {
+            down(center)
+            advanceEventTime(800)
+            moveTo(center + androidx.compose.ui.geometry.Offset(12f, 0f))
+            up()
+        }
+        tile.assertIsOff()
+        val tileBounds = tile.fetchSemanticsNode().boundsInRoot
+        val bagCenter = compose.onNodeWithTag("ritual-bag").fetchSemanticsNode().boundsInRoot.center
+        tile.performTouchInput {
+            down(center)
+            advanceEventTime(800)
+            moveTo(bagCenter - tileBounds.topLeft)
+            up()
+        }
+        tile.assertIsOn()
     }
 
     @Test fun legacyAlarmMigrationAndCustomFieldsRoundTrip() {

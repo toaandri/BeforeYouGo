@@ -3,8 +3,8 @@ package com.toaandri.beforeyougo
 import java.time.ZonedDateTime
 
 enum class DeliveryMode(val label: String, val description: String) {
-    RING("Sonnerie", "Une alarme audible avec commandes Arrêter et Reporter."),
-    NOTIFICATION("Notification", "Un rappel discret dans la barre de notifications, sans sonnerie.")
+    RING("Avec sonnerie", "Un signal sonore si tu en as envie. Tu peux l’arrêter ou le reporter."),
+    NOTIFICATION("Petit signe", "Une invitation silencieuse à faire le tour. À ouvrir quand tu veux.")
 }
 
 data class DepartureAlarm(
@@ -14,7 +14,7 @@ data class DepartureAlarm(
     val minute: Int = 0,
     val days: Set<Int> = (1..5).toSet(),
     val enabled: Boolean = true,
-    val deliveryMode: DeliveryMode = DeliveryMode.RING,
+    val deliveryMode: DeliveryMode = DeliveryMode.NOTIFICATION,
     val soundUri: String = "default",
     val soundName: String = "Sonnerie du téléphone",
     val vibrate: Boolean = true,

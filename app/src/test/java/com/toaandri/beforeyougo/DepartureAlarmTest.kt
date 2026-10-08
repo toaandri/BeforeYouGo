@@ -8,6 +8,12 @@ import java.time.ZonedDateTime
 class DepartureAlarmTest {
     private fun now(value: String) = ZonedDateTime.parse(value)
 
+    @Test fun newDeparturesInviteQuietlyUnlessSoundIsChosen() {
+        val alarm = DepartureAlarm(1)
+        assertEquals(DeliveryMode.NOTIFICATION, alarm.deliveryMode)
+        assertEquals(DeliveryMode.RING, alarm.copy(deliveryMode = DeliveryMode.RING).deliveryMode)
+    }
+
     @Test fun weekdaysSkipWeekendAndRollToNextWeek() {
         val alarm = DepartureAlarm(1)
         assertEquals("2026-10-05T08:00+03:00[Europe/Istanbul]",

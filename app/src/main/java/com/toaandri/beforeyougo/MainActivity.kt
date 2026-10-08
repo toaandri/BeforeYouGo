@@ -13,11 +13,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
@@ -27,27 +27,30 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.toaandri.beforeyougo.ui.theme.BeforeYouGoTheme
-import com.toaandri.beforeyougo.ui.theme.Ink
-import com.toaandri.beforeyougo.ui.theme.Amber
 import kotlinx.coroutines.delay
-import java.time.LocalDate
+import kotlinx.coroutines.launch
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private var openedAlarm by mutableStateOf<Long?>(null)
+    private var openRequest by mutableIntStateOf(0)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -56,25 +59,31 @@ class MainActivity : ComponentActivity() {
             val store = remember { AppStore(this) }
             var theme by remember { mutableStateOf(store.themePreference()) }
             BeforeYouGoTheme(theme) {
-                DepartureApp(store, theme, { theme = it; store.saveThemePreference(it) }, openedAlarm)
+                DepartureApp(store, theme, { theme = it; store.saveThemePreference(it) }, openedAlarm, openRequest)
             }
         }
     }
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); readAlarmIntent(intent) }
     private fun readAlarmIntent(intent: Intent) {
         openedAlarm = if (intent.hasExtra(ReminderScheduler.EXTRA_ID)) intent.getLongExtra(ReminderScheduler.EXTRA_ID, -1) else null
+        openRequest++
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DepartureApp(store: AppStore, theme: ThemePreference, onTheme: (ThemePreference) -> Unit, openedAlarm: Long?) {
+private fun DepartureApp(store: AppStore, theme: ThemePreference, onTheme: (ThemePreference) -> Unit, openedAlarm: Long?, openRequest: Int) {
     val context = LocalContext.current
     val owner = context as ComponentActivity
     var alarms by remember { mutableStateOf(store.alarms()) }
     var objects by remember { store.checksForToday(); mutableStateOf(store.items()) }
     var checks by remember { mutableStateOf(store.checksForToday()) }
     var now by remember { mutableStateOf(ZonedDateTime.now()) }
+    val todayScroll = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
+    var dragPointer by remember { mutableStateOf<Offset?>(null) }
+    var viewport by remember { mutableStateOf(Rect.Zero) }
     var page by rememberSaveable { mutableIntStateOf(0) }
     var selectedAlarm by rememberSaveable { mutableStateOf<Long?>(null) }
     var editor by remember { mutableStateOf<DepartureAlarm?>(null) }
@@ -83,9 +92,10 @@ private fun DepartureApp(store: AppStore, theme: ThemePreference, onTheme: (Them
     var exact by remember { mutableStateOf(ReminderScheduler.canSchedule(context)) }
     var notifications by remember { mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled()) }
     var notice by remember { mutableStateOf<String?>(null) }
+    var departing by rememberSaveable { mutableStateOf(false) }
     val notificationRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         notifications = granted && NotificationManagerCompat.from(context).areNotificationsEnabled()
-        if (!notifications) notice = "Notifications refusées : les alarmes restent enregistrées mais ne sonneront pas."
+        if (!notifications) notice = "Ton départ est enregistré. Les invitations sont désactivées ; ton sac reste accessible à tout moment."
     }
     fun refresh() {
         now = ZonedDateTime.now(); alarms = store.alarms(); checks = store.checksForToday(); objects = store.items()
@@ -98,7 +108,7 @@ private fun DepartureApp(store: AppStore, theme: ThemePreference, onTheme: (Them
         alarms = if (alarms.any { it.id == alarm.id }) alarms.map { if (it.id == alarm.id) alarm else it } else alarms + alarm
         store.saveAlarms(alarms)
         val scheduled = ReminderScheduler.schedule(context, alarm)
-        if (alarm.enabled && !scheduled) notice = "Alarme enregistrée. Autorisez les alarmes exactes pour qu’elle puisse sonner."
+        if (alarm.enabled && !scheduled) notice = "Ton départ est enregistré. Pour recevoir le petit signe à l’heure choisie, autorise les alarmes exactes dans Android. Tu peux aussi utiliser ton sac sans notification."
         if (alarm.enabled && !notifications && Build.VERSION.SDK_INT >= 33) notificationRequest.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
     fun saveObjects(values: List<SavedItem>) { objects = values; store.saveItems(values) }
@@ -118,17 +128,31 @@ private fun DepartureApp(store: AppStore, theme: ThemePreference, onTheme: (Them
             now = updated
         }
     }
-    LaunchedEffect(openedAlarm, RingingState.alarmId) {
-        (RingingState.alarmId ?: openedAlarm)?.let { selectedAlarm = it; page = 0 }
+    LaunchedEffect(RingingState.alarmId) {
+        RingingState.alarmId?.let { selectedAlarm = it; page = 0; departing = false }
+    }
+    LaunchedEffect(openRequest) {
+        openedAlarm?.let { selectedAlarm = it; page = 0; departing = false }
+    }
+    LaunchedEffect(selectedAlarm, openRequest) { todayScroll.scrollToItem(0) }
+    LaunchedEffect(dragPointer != null) {
+        // Keep a long collection usable: holding a dragged object near the upper edge reveals the bag.
+        val edge = with(density) { 80.dp.toPx() }
+        val step = with(density) { 12.dp.toPx() }
+        while (dragPointer != null) {
+            if (dragPointer!!.y < viewport.top + edge) todayScroll.scrollBy(-step)
+            delay(16)
+        }
     }
     val selected = alarms.find { it.id == selectedAlarm }
     val todayItems = if (selected != null) itemsForAlarm(objects, selected, now.toLocalDate()) else itemsForDay(objects, now.toLocalDate())
     Scaffold(
-        topBar = { TopAppBar(title = { Text("BeforeYouGo", fontWeight = FontWeight.ExtraBold) },
+        topBar = { TopAppBar(title = { Text("before you go.", style = MaterialTheme.typography.titleLarge) },
+            actions = { Icon(Icons.Outlined.WbSunny, null, Modifier.padding(end = 22.dp), tint = MaterialTheme.colorScheme.primary) },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)) },
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                listOf("Aujourd’hui" to Icons.Outlined.Alarm, "Objets" to Icons.Outlined.Inventory2, "Réglages" to Icons.Outlined.Settings).forEachIndexed { index, (label, icon) ->
+                listOf("Mon départ" to Icons.Outlined.ShoppingBag, "Mes objets" to Icons.Outlined.Category, "À ma façon" to Icons.Outlined.Tune).forEachIndexed { index, (label, icon) ->
                     NavigationBarItem(page == index, { page = index }, icon = { Icon(icon, null) }, label = { Text(label) })
                 }
             }
@@ -141,54 +165,60 @@ private fun DepartureApp(store: AppStore, theme: ThemePreference, onTheme: (Them
         }
     ) { padding ->
         when (page) {
-            0 -> LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            0 -> LazyColumn(Modifier.fillMaxSize().padding(padding).onGloballyPositioned { viewport = it.boundsInRoot() }, state = todayScroll, contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 item {
-                    val next = alarms.mapNotNull { alarm -> nextOccurrence(alarm, now)?.let { alarm to it } }.minByOrNull { it.second.toInstant() }
-                    Hero(next, exact && notifications)
+                    Text(now.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.FRENCH)),
+                        style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.height(10.dp))
+                    Text("On fait le tour ?", style = MaterialTheme.typography.displaySmall)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Un petit rituel avant la suite.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (selected != null) {
+                        Spacer(Modifier.height(12.dp))
+                        Text(selected.name, style = MaterialTheme.typography.titleMedium)
+                        TextButton({ selectedAlarm = null }) { Text("Revenir au sac du jour") }
+                    }
                 }
                 item {
                     RingingState.alarmId?.let { id -> alarms.find { it.id == id }?.let { ringing ->
                         Panel {
-                            Text(if (RingingState.preview) "Essai en cours · 10 secondes" else "C’est l’heure · ${ringing.name}", style = MaterialTheme.typography.titleLarge)
+                            Text(if (RingingState.preview) "On essaie le son · 10 secondes" else "Ton départ · ${ringing.name}", style = MaterialTheme.typography.titleLarge)
                             Button({ AlarmRingingService.command(context, id, AlarmRingingService.STOP) }, Modifier.fillMaxWidth()) { Text("Arrêter la sonnerie") }
                             if (!RingingState.preview) OutlinedButton({ AlarmRingingService.command(context, id, AlarmRingingService.SNOOZE); refresh() }, Modifier.fillMaxWidth()) { Text("Reporter ${ringing.snoozeMinutes} minutes") }
                         }
                     } }
                 }
-                if (!exact || !notifications) item {
+                item {
+                    DepartureRitual(todayItems, checks, { id, checked ->
+                        val currentChecks = store.checksForToday()
+                        objects = store.items(); now = ZonedDateTime.now()
+                        checks = if (itemsForDay(objects, now.toLocalDate()).any { it.id == id }) currentChecks + (id to checked) else currentChecks
+                        store.saveChecksForToday(checks)
+                    }, { page = 1 }, {
+                        RingingState.alarmId?.let { AlarmRingingService.command(context, it, AlarmRingingService.STOP) }
+                        departing = true
+                    }, { dragPointer = it })
+                }
+                item { HorizontalDivider(Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant) }
+                if (alarms.any { it.enabled } && (!exact || !notifications)) item {
                     Panel {
-                        Text("Terminer la configuration", fontWeight = FontWeight.Bold)
-                        Text("Pour sonner à l’heure, BeforeYouGo a besoin des alarmes exactes et des notifications.", style = MaterialTheme.typography.bodyMedium)
-                        TextButton({ page = 2 }) { Text("Vérifier les autorisations") }
+                        Text("Envie d’un petit signe ?", style = MaterialTheme.typography.titleLarge)
+                        Text("Tes départs sont enregistrés. Pour recevoir leurs invitations, il reste les autorisations Android à activer.", style = MaterialTheme.typography.bodyMedium)
+                        TextButton({ page = 2 }) { Text("Choisir mes autorisations") }
                     }
                 }
                 item {
-                    Text("Vos départs", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("Une routine pour chaque jour de votre semaine.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("Les rendez-vous du sac", style = MaterialTheme.typography.headlineMedium)
+                    Text("Un petit signe, quand ça t’arrange.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 items(alarms.sortedWith(compareBy({ it.hour }, { it.minute })), key = { "alarm-${it.id}" }) { alarm ->
                     AlarmCard(alarm, now, store.snoozedUntil(alarm.id), exact && notifications,
                         { editor = alarm }, { saveAlarm(alarm.copy(enabled = it)) },
                         { nextOccurrence(alarm, now)?.let { saveAlarm(alarm.copy(skipUntil = it.toInstant().toEpochMilli())) } },
                         { saveAlarm(alarm.copy(skipUntil = 0)) }, { deleting = alarm },
-                        { selectedAlarm = alarm.id }, { ReminderScheduler.cancel(context, alarm.id); ReminderScheduler.schedule(context, alarm); refresh() })
+                        { selectedAlarm = alarm.id; scope.launch { todayScroll.animateScrollToItem(0) } }, { ReminderScheduler.cancel(context, alarm.id); ReminderScheduler.schedule(context, alarm); refresh() })
                 }
-                item { OutlinedButton({ editor = DepartureAlarm(newId(alarms.map { it.id })) }, Modifier.fillMaxWidth()) { Text("Créer une alarme") } }
-                item {
-                    Text("Votre checklist", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text(if (selected == null) "Tous les objets prévus aujourd’hui" else "Routine : ${selected.name}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    if (selected != null) TextButton({ selectedAlarm = null }) { Text("Afficher tous mes objets") }
-                    if (todayItems.isNotEmpty()) {
-                        Text("${todayItems.count { checks[it.id] == true }} / ${todayItems.size} prêts", modifier = Modifier.padding(vertical = 8.dp))
-                        LinearProgressIndicator(progress = { completionFor(todayItems, checks) }, modifier = Modifier.fillMaxWidth())
-                    }
-                }
-                if (todayItems.isEmpty()) item { Panel { Text("Rien à préparer pour cette liste."); TextButton({ page = 1 }) { Text("Voir mes objets") } } }
-                items(todayItems, key = { "item-${it.id}" }) { item ->
-                    ChecklistRow(item, checks[item.id] == true) { checked ->
-                        checks = checks.toMutableMap().apply { put(item.id, checked) }; store.saveChecksForToday(checks)
-                    }
-                }
+                item { OutlinedButton({ editor = DepartureAlarm(newId(alarms.map { it.id })) }, Modifier.fillMaxWidth()) { Icon(Icons.Outlined.Add, null); Spacer(Modifier.width(8.dp)); Text("Imaginer un départ") } }
             }
             1 -> ObjectsScreen(objects.filterNot { it.archived }, Modifier.padding(padding),
                 { objectEditor = it }, { removed ->
@@ -210,12 +240,17 @@ private fun DepartureApp(store: AppStore, theme: ThemePreference, onTheme: (Them
         saveObjects(if (objects.any { it.id == updated.id }) objects.map { if (it.id == updated.id) updated else it } else objects + updated)
         objectEditor = null
     } }
-    deleting?.let { alarm -> AlertDialog(onDismissRequest = { deleting = null }, title = { Text("Supprimer « ${alarm.name} » ?") }, text = { Text("Cette sonnerie sera annulée. Vos objets seront conservés.") },
+    if (departing) AlertDialog(onDismissRequest = { departing = false },
+        icon = { Icon(Icons.Outlined.WbSunny, null, tint = MaterialTheme.colorScheme.primary) },
+        title = { Text("La suite est à toi.") },
+        text = { Text(if (todayItems.all { checks[it.id] == true }) "Ton sac est prêt. Bonne route !" else "Bonne route ! Tu retrouveras ton sac ici quand tu veux.") },
+        confirmButton = { TextButton({ departing = false }) { Text("À tout à l’heure") } })
+    deleting?.let { alarm -> AlertDialog(onDismissRequest = { deleting = null }, title = { Text("Supprimer « ${alarm.name} » ?") }, text = { Text("Ce rendez-vous sera annulé. Tes objets restent dans ta collection.") },
         confirmButton = { TextButton({
             ReminderScheduler.cancel(context, alarm.id); AlarmRingingService.command(context, alarm.id, AlarmRingingService.STOP)
             alarms = alarms.filterNot { it.id == alarm.id }; store.saveAlarms(alarms); deleting = null
         }) { Text("Supprimer") } }, dismissButton = { TextButton({ deleting = null }) { Text("Annuler") } }) }
-    notice?.let { message -> AlertDialog(onDismissRequest = { notice = null }, title = { Text("Alarme enregistrée") }, text = { Text(message) },
+    notice?.let { message -> AlertDialog(onDismissRequest = { notice = null }, title = { Text("Ton départ est enregistré") }, text = { Text(message) },
         confirmButton = { TextButton({ notice = null; page = 2 }) { Text("Ouvrir les réglages") } }, dismissButton = { TextButton({ notice = null }) { Text("Plus tard") } }) }
 }
 
@@ -238,58 +273,41 @@ fun openSettings(context: android.content.Context, intent: Intent) {
     }
 }
 
-@Composable private fun Hero(next: Pair<DepartureAlarm, ZonedDateTime>?, ready: Boolean) {
-    Card(shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Ink)) {
-        Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Outlined.Alarm, null, tint = Amber); Spacer(Modifier.width(10.dp)); Text("LE PROCHAIN DÉPART", color = Amber, style = MaterialTheme.typography.labelLarge) }
-            Text(next?.first?.timeLabel ?: "À votre rythme.", color = Color.White, fontSize = if (next != null) 52.sp else 30.sp, fontWeight = FontWeight.Bold)
-            Text(next?.let { "${it.first.name} · ${it.second.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.FRENCH))}" } ?: "Composez votre semaine, partez l’esprit léger.", color = Color.White.copy(alpha = .8f))
-            if (next != null && !ready) Text("En attente d’autorisation Android", color = Amber, style = MaterialTheme.typography.labelLarge)
-        }
-    }
-}
-
 @Composable private fun AlarmCard(alarm: DepartureAlarm, now: ZonedDateTime, snoozedUntil: Long, ready: Boolean,
     onEdit: () -> Unit, onToggle: (Boolean) -> Unit, onSkip: () -> Unit, onUnskip: () -> Unit,
     onDelete: () -> Unit, onChecklist: () -> Unit, onCancelSnooze: () -> Unit) {
     val context = LocalContext.current
+    var expanded by rememberSaveable(alarm.id) { mutableStateOf(false) }
     Panel {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f).clickable(onClick = onEdit)) {
                 Text(alarm.timeLabel, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
                 Text(alarm.name, style = MaterialTheme.typography.titleMedium)
             }
-            Switch(alarm.enabled, onToggle, modifier = Modifier.minimumInteractiveComponentSize())
+            Switch(alarm.enabled, onToggle, modifier = Modifier.minimumInteractiveComponentSize()
+                .semantics { contentDescription = "Invitation pour ${alarm.name}" })
         }
         Text(daysLabel(alarm.days), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-        Text(if (!alarm.enabled) "En pause" else if (!ready) "Autorisations requises" else nextOccurrence(alarm, now)?.let {
-            "Prochaine : ${it.format(DateTimeFormatter.ofPattern("EEE d MMM · HH:mm", Locale.FRENCH))}"
+        Text(if (!alarm.enabled) "Invitation en pause" else if (!ready) "Invitation en attente d’autorisation" else nextOccurrence(alarm, now)?.let {
+            "Prochain signe : ${it.format(DateTimeFormatter.ofPattern("EEE d MMM · HH:mm", Locale.FRENCH))}"
         }.orEmpty(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(if (alarm.deliveryMode == DeliveryMode.NOTIFICATION) "Notification discrète" else "${if (alarm.soundUri == "silent") "Sans son" else alarm.soundName} · ${if (alarm.vibrate) "Vibration" else "Sans vibration"}", style = MaterialTheme.typography.bodySmall)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            TextButton(onEdit) { Text("Personnaliser") }
-            TextButton(onChecklist) { Text("Checklist") }
-            IconButton(onDelete) { Icon(Icons.Outlined.DeleteOutline, "Supprimer ${alarm.name}") }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onChecklist) { Text("Ouvrir ce sac") }
+            IconButton({ expanded = !expanded }) { Icon(if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.MoreHoriz, if (expanded) "Masquer les options de ${alarm.name}" else "Options de ${alarm.name}") }
         }
-        if (alarm.enabled) {
-            if (snoozedUntil > now.toInstant().toEpochMilli()) TextButton(onCancelSnooze) { Text("Annuler le report en cours") }
-            else if (alarm.skipUntil > now.toInstant().toEpochMilli()) TextButton(onUnskip) { Text("Rétablir la sonnerie ignorée") }
-            else TextButton(onSkip) { Text("Passer la prochaine sonnerie") }
-        }
-        if (ready && alarm.deliveryMode == DeliveryMode.RING) TextButton({ context.startForegroundService(Intent(context, AlarmRingingService::class.java)
-            .putExtra(ReminderScheduler.EXTRA_ID, alarm.id).putExtra(AlarmRingingService.PREVIEW, true)) }) { Text("Écouter un essai · 10 s") }
-    }
-}
-
-@Composable private fun ChecklistRow(item: SavedItem, checked: Boolean, onChecked: (Boolean) -> Unit) {
-    Card(shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = if (checked) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface)) {
-        Row(Modifier.fillMaxWidth().toggleable(checked, role = Role.Checkbox, onValueChange = onChecked).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            ObjectBadge(iconFor(item)); Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(item.title, fontWeight = FontWeight.SemiBold)
-                Text(if (item.essential) "Tous les jours" else "Prévu le ${item.dueDate}", style = MaterialTheme.typography.bodySmall)
+        if (expanded) {
+            Text(if (alarm.deliveryMode == DeliveryMode.NOTIFICATION) "Petit signe · notification silencieuse" else "${if (alarm.soundUri == "silent") "Sans son" else alarm.soundName} · ${if (alarm.vibrate) "Vibration" else "Sans vibration"}", style = MaterialTheme.typography.bodySmall)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(onEdit) { Text("Personnaliser") }
+                IconButton(onDelete) { Icon(Icons.Outlined.DeleteOutline, "Supprimer ${alarm.name}") }
             }
-            Checkbox(checked, null)
+            if (alarm.enabled) {
+                if (snoozedUntil > now.toInstant().toEpochMilli()) TextButton(onCancelSnooze) { Text("Annuler le report en cours") }
+                else if (alarm.skipUntil > now.toInstant().toEpochMilli()) TextButton(onUnskip) { Text("Rétablir le prochain rendez-vous") }
+                else TextButton(onSkip) { Text("Passer le prochain rendez-vous") }
+            }
+            if (ready && alarm.deliveryMode == DeliveryMode.RING) TextButton({ context.startForegroundService(Intent(context, AlarmRingingService::class.java)
+                .putExtra(ReminderScheduler.EXTRA_ID, alarm.id).putExtra(AlarmRingingService.PREVIEW, true)) }) { Text("Écouter un essai · 10 s") }
         }
     }
 }
@@ -298,7 +316,7 @@ fun openSettings(context: android.content.Context, intent: Intent) {
     modifier: Modifier, onExact: () -> Unit, onNotifications: () -> Unit) {
     val context = LocalContext.current
     LazyColumn(modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { Text("À votre façon", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold) }
+        item { Text("À ta façon.", style = MaterialTheme.typography.displaySmall) }
         item { Panel {
             Text("Apparence", style = MaterialTheme.typography.titleLarge)
             ThemePreference.entries.forEach { option ->
@@ -308,21 +326,22 @@ fun openSettings(context: android.content.Context, intent: Intent) {
             }
         } }
         item { Panel {
-            Text("Des sonneries à l’heure", style = MaterialTheme.typography.titleLarge)
+            Text("Un signe, si tu veux", style = MaterialTheme.typography.titleLarge)
+            Text("Ton sac reste disponible même sans notification.", style = MaterialTheme.typography.bodyMedium)
             Text("Alarmes exactes : ${if (exact) "autorisées" else "à autoriser"}")
             if (!exact) OutlinedButton(onExact, Modifier.fillMaxWidth()) { Text("Autoriser les alarmes exactes") }
             Text("Notifications : ${if (notifications) "autorisées" else "à autoriser"}")
             OutlinedButton(onNotifications, Modifier.fillMaxWidth()) { Text("Réglages des notifications") }
-            Text("Chaque routine peut être une sonnerie ou une notification discrète. Les sonneries utilisent le volume Alarme, s’arrêtent après 2 minutes, et leur essai dure 10 secondes.", style = MaterialTheme.typography.bodySmall)
+            Text("Les nouveaux départs proposent un petit signe silencieux. Tu peux choisir une sonnerie pour chacun : volume Alarme, arrêt automatique après 2 minutes et essai de 10 secondes.", style = MaterialTheme.typography.bodySmall)
             TextButton({ openSettings(context, Intent(Settings.ACTION_SOUND_SETTINGS)) }) { Text("Volume et sons du téléphone") }
         } }
         item { Panel {
-            Text("Votre semaine, vos routines", style = MaterialTheme.typography.titleLarge)
-            Text("Créez plusieurs alarmes dans Aujourd’hui : Travail en semaine, Sport le mardi et le jeudi, ou Sortie le week-end. Chaque alarme possède ses jours, sa sonnerie et sa checklist.")
+            Text("Ton rythme, tes départs", style = MaterialTheme.typography.titleLarge)
+            Text("Dans Mon départ, imagine un rendez-vous pour le bureau, la piscine ou les virées du week-end. À chacun ses jours et ses objets. Tu peux passer un rendez-vous, mettre un départ en pause ou reporter une invitation.")
         } }
         item { Panel {
-            Text("Vos données restent ici", style = MaterialTheme.typography.titleLarge)
-            Text("Sans compte, publicité ni suivi. Vos listes et sonneries sont stockées sur ce téléphone. Une désinstallation les efface.", style = MaterialTheme.typography.bodyMedium)
+            Text("Ton carnet reste ici", style = MaterialTheme.typography.titleLarge)
+            Text("Sans compte, publicité ni suivi. Tes objets et tes départs restent sur ce téléphone. Une désinstallation les efface.", style = MaterialTheme.typography.bodyMedium)
         } }
     }
 }
