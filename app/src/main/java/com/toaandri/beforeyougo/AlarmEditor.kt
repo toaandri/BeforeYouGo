@@ -42,7 +42,7 @@ fun AlarmEditor(alarm: DepartureAlarm, objects: List<SavedItem>, onDismiss: () -
     var days by rememberSaveable(alarm.id) { mutableStateOf(alarm.days.toList()) }
     var deliveryMode by rememberSaveable(alarm.id) { mutableStateOf(alarm.deliveryMode) }
     var sound by rememberSaveable(alarm.id) { mutableStateOf(alarm.soundUri) }
-    var soundName by rememberSaveable(alarm.id) { mutableStateOf(alarm.soundName) }
+    var soundName by rememberSaveable(alarm.id) { mutableStateOf(alarm.displaySoundName) }
     var vibrate by rememberSaveable(alarm.id) { mutableStateOf(alarm.vibrate) }
     var snooze by rememberSaveable(alarm.id) { mutableIntStateOf(alarm.snoozeMinutes) }
     var allItems by rememberSaveable(alarm.id) { mutableStateOf(alarm.allItems) }
@@ -53,56 +53,56 @@ fun AlarmEditor(alarm: DepartureAlarm, objects: List<SavedItem>, onDismiss: () -
             @Suppress("DEPRECATION")
             val uri = result.data?.getParcelableExtra<Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
             sound = uri?.toString() ?: "silent"
-            soundName = if (uri == null) "Silencieux" else runCatching {
+            soundName = if (uri == null) uiText(R.string.ui_silent) else runCatching {
                 RingtoneManager.getRingtone(context, uri)?.getTitle(context)
-            }.getOrNull() ?: "Sonnerie personnalisée"
+            }.getOrNull() ?: uiText(R.string.ui_custom_ringtone)
         }
     }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(Modifier.fillMaxSize().safeDrawingPadding().imePadding()) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onDismiss) { Icon(Icons.Outlined.Close, "Fermer") }
-                    Text("Une page de départ", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
+                    IconButton(onDismiss) { Icon(Icons.Outlined.Close, uiText(R.string.ui_close)) }
+                    Text(uiText(R.string.ui_a_departure_page), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
                 }
                 LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     item {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("LE RENDEZ-VOUS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, letterSpacing = 2.sp)
-                            Text("On part où ?", style = MaterialTheme.typography.headlineLarge, fontFamily = FontFamily.Serif)
-                            Text("Un petit rituel avant de filer. À ton rythme.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(uiText(R.string.ui_the_appointment), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, letterSpacing = 2.sp)
+                            Text(uiText(R.string.ui_where_are_we_going), style = MaterialTheme.typography.headlineLarge, fontFamily = FontFamily.Serif)
+                            Text(uiText(R.string.ui_a_small_ritual_before_you_go_at_your_own_pace), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     item { Panel {
-                        OutlinedTextField(name, { name = it.take(60) }, Modifier.fillMaxWidth(), label = { Text("Ce départ s’appelle…") },
-                            placeholder = { Text("Bureau, escapade, séance de sport…") }, singleLine = true, shape = RoundedCornerShape(18.dp))
-                        Text("À quelle heure te faire signe ?", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                        Row(Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = "Changer l’heure du départ") {
+                        OutlinedTextField(name, { name = it.take(60) }, Modifier.fillMaxWidth(), label = { Text(uiText(R.string.ui_name_this_departure)) },
+                            placeholder = { Text(uiText(R.string.ui_work_a_weekend_away_a_workout)) }, singleLine = true, shape = RoundedCornerShape(18.dp))
+                        Text(uiText(R.string.ui_when_should_we_give_you_a_nudge), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                        Row(Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = uiText(R.string.ui_change_departure_time)) {
                             TimePickerDialog(context, { _, h, m -> hour = h; minute = m }, hour, minute, true).show()
                         }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text("%02d:%02d".format(hour, minute), fontSize = 56.sp, fontFamily = FontFamily.Serif, modifier = Modifier.weight(1f))
                             Icon(Icons.Outlined.Schedule, null, tint = MaterialTheme.colorScheme.primary)
                         }
-                        Text("Choisis ton moment, un peu avant de partir si tu préfères.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(uiText(R.string.ui_choose_your_moment_a_little_before_leaving_if_you_prefer), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } }
                     item { Panel {
-                        Text("Les jours qui vont avec", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
+                        Text(uiText(R.string.ui_the_days_that_fit), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf("Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim").forEachIndexed { index, label ->
+                            listOf(uiText(R.string.ui_mon), uiText(R.string.ui_tue), uiText(R.string.ui_wed), uiText(R.string.ui_thu), uiText(R.string.ui_fri), uiText(R.string.ui_sat), uiText(R.string.ui_sun)).forEachIndexed { index, label ->
                                 val day = index + 1
                                 FilterChip(day in days, { days = if (day in days) days - day else days + day }, label = { Text(label) })
                             }
                         }
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            TextButton({ days = (1..5).toList() }) { Text("Semaine") }
-                            TextButton({ days = listOf(6, 7) }) { Text("Week-end") }
-                            TextButton({ days = (1..7).toList() }) { Text("Tous les jours") }
+                            TextButton({ days = (1..5).toList() }) { Text(uiText(R.string.ui_weekdays)) }
+                            TextButton({ days = listOf(6, 7) }) { Text(uiText(R.string.ui_weekend)) }
+                            TextButton({ days = (1..7).toList() }) { Text(uiText(R.string.ui_every_day)) }
                         }
-                        if (days.isEmpty()) Text("Choisis au moins un jour pour ce rendez-vous.", color = MaterialTheme.colorScheme.error)
+                        if (days.isEmpty()) Text(uiText(R.string.ui_choose_at_least_one_day_for_this_appointment), color = MaterialTheme.colorScheme.error)
                     } }
                     item { Panel {
-                        Text("Ton petit signe", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
-                        Text("Discret ou sonore, c’est toi qui choisis.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(uiText(R.string.ui_your_little_nudge), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
+                        Text(uiText(R.string.ui_quiet_or_with_a_sound_you_choose), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         listOf(DeliveryMode.NOTIFICATION, DeliveryMode.RING).forEach { mode ->
                             val selected = deliveryMode == mode
                             Surface(
@@ -114,23 +114,23 @@ fun AlarmEditor(alarm: DepartureAlarm, objects: List<SavedItem>, onDismiss: () -
                                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                                     RadioButton(selected, onClick = null)
                                     Column(Modifier.padding(start = 10.dp).weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        Text(if (mode == DeliveryMode.NOTIFICATION) "Un mot discret" else "Une sonnerie", fontWeight = FontWeight.SemiBold)
-                                        Text(if (mode == DeliveryMode.NOTIFICATION) "Une notification, sans son ni vibration." else "Un signal sonore, avec arrêt et report à la demande.", style = MaterialTheme.typography.bodySmall)
+                                        Text(if (mode == DeliveryMode.NOTIFICATION) uiText(R.string.ui_a_quiet_note) else uiText(R.string.ui_a_sound), fontWeight = FontWeight.SemiBold)
+                                        Text(if (mode == DeliveryMode.NOTIFICATION) uiText(R.string.ui_a_notification_without_sound_or_vibration) else uiText(R.string.ui_a_sound_with_stop_and_snooze_controls), style = MaterialTheme.typography.bodySmall)
                                     }
                                 }
                             }
                         }
                         Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = RoundedCornerShape(18.dp)) {
                             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text("UN APERÇU DU TON", style = MaterialTheme.typography.labelSmall, letterSpacing = 1.sp)
-                                Text("On fait le tour ?", fontWeight = FontWeight.SemiBold)
-                                Text("${name.ifBlank { "Ton départ" }} · Un petit tour et tu files.", style = MaterialTheme.typography.bodySmall)
+                                Text(uiText(R.string.ui_a_preview_of_the_tone), style = MaterialTheme.typography.labelSmall, letterSpacing = 1.sp)
+                                Text(uiText(R.string.ui_shall_we_check_the_bag), fontWeight = FontWeight.SemiBold)
+                                Text(uiText(R.string.ui_a_quick_check_then_off_you_go, name.ifBlank { uiText(R.string.ui_your_departure) }), style = MaterialTheme.typography.bodySmall)
                             }
                         }
                         Column(Modifier.animateContentSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             if (deliveryMode == DeliveryMode.RING) {
                                 HorizontalDivider()
-                                Text("Le son à ta façon", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                                Text(uiText(R.string.ui_sound_your_way), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                                 OutlinedButton({
                                     val existing = when (sound) {
                                         "silent" -> null
@@ -140,12 +140,12 @@ fun AlarmEditor(alarm: DepartureAlarm, objects: List<SavedItem>, onDismiss: () -
                                     runCatching {
                                         picker.launch(Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
                                             .putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
-                                            .putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Son de ce départ")
+                                            .putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, uiText(R.string.ui_departure_sound))
                                             .putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true)
                                             .putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
                                             .putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
                                             .putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, existing))
-                                    }.onFailure { soundError = "Le sélecteur de sonnerie n’est pas disponible sur ce téléphone." }
+                                    }.onFailure { soundError = uiText(R.string.ui_the_ringtone_picker_is_unavailable_on_this_phone) }
                                 }, Modifier.fillMaxWidth()) {
                                     Icon(Icons.Outlined.MusicNote, null)
                                     Spacer(Modifier.width(8.dp))
@@ -153,31 +153,31 @@ fun AlarmEditor(alarm: DepartureAlarm, objects: List<SavedItem>, onDismiss: () -
                                 }
                                 soundError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("Avec une vibration", Modifier.weight(1f))
+                                    Text(uiText(R.string.ui_with_vibration), Modifier.weight(1f))
                                     Switch(vibrate, { vibrate = it })
                                 }
-                                if (sound == "silent" && !vibrate) Text("Avec ces réglages, seule la notification s’affichera.", style = MaterialTheme.typography.bodySmall)
+                                if (sound == "silent" && !vibrate) Text(uiText(R.string.ui_with_these_settings_only_a_notification_will_appear), style = MaterialTheme.typography.bodySmall)
                             }
                         }
-                        Text("Encore quelques minutes ?", fontWeight = FontWeight.SemiBold)
-                        Text("La durée du report quand tu préfères y revenir plus tard.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(uiText(R.string.ui_a_few_more_minutes), fontWeight = FontWeight.SemiBold)
+                        Text(uiText(R.string.ui_how_long_to_wait_when_you_want_to_come_back), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf(5, 10, 15).forEach { duration ->
-                                FilterChip(snooze == duration, { snooze = duration }, label = { Text("$duration min") })
+                                FilterChip(snooze == duration, { snooze = duration }, label = { Text(uiText(R.string.ui_min, duration)) })
                             }
                         }
                     } }
                     item { Panel {
-                        Text("À emporter", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
+                        Text(uiText(R.string.ui_to_bring_along), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Toute ma collection du jour", Modifier.weight(1f))
+                            Text(uiText(R.string.ui_my_whole_daily_collection), Modifier.weight(1f))
                             Switch(allItems, { allItems = it })
                         }
-                        Text(if (allItems) "Les nouveaux objets rejoignent aussi ce départ, à partir de la date choisie." else "Compose le sac de ce départ. Les objets datés apparaîtront à partir du jour prévu.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        if (!allItems && objects.isEmpty()) Text("Ta collection est encore vide. Tu peux la composer dans l’onglet Mes objets.")
+                        Text(if (allItems) uiText(R.string.ui_new_objects_also_join_this_departure_starting_on_their_chosen) else uiText(R.string.ui_compose_this_departure_bag_dated_objects_appear_from_their_scheduled), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        if (!allItems && objects.isEmpty()) Text(uiText(R.string.ui_your_collection_is_empty_add_objects_in_the_my_objects))
                         if (!allItems && objects.isNotEmpty()) {
                             val count = objects.count { it.id in chosenItems }
-                            Text(if (count > 1) "$count objets choisis" else "$count objet choisi", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                            Text(if (count > 1) uiText(R.string.ui_objects_selected, count) else uiText(R.string.ui_object_selected, count), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                         }
                     } }
                     if (!allItems) items(objects, key = { it.id }) { item ->
@@ -198,7 +198,7 @@ fun AlarmEditor(alarm: DepartureAlarm, objects: List<SavedItem>, onDismiss: () -
                         soundUri = sound, soundName = soundName, vibrate = vibrate, snoozeMinutes = snooze, allItems = allItems,
                         itemIds = chosenItems.toSet(), skipUntil = 0))
                 }, enabled = name.isNotBlank() && days.isNotEmpty(), modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp).heightIn(min = 52.dp)) {
-                    Text("Enregistrer ce départ")
+                    Text(uiText(R.string.ui_save_this_departure))
                 }
             }
         }

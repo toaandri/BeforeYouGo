@@ -68,11 +68,11 @@ fun DepartureRitual(
                 Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                     ToteIllustration(Modifier.size(82.dp, 100.dp))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text(if (overBag) "Par ici !" else "Mon sac du jour", style = MaterialTheme.typography.titleLarge)
+                        Text(if (overBag) uiText(R.string.ui_over_here) else uiText(R.string.ui_my_bag_for_today), style = MaterialTheme.typography.titleLarge)
                         Text(
-                            if (items.isEmpty()) "Il y a de la place pour tes envies."
-                            else if (packed == items.size) "Tout ton petit monde est là."
-                            else "$packed sur ${items.size} à bord",
+                            if (items.isEmpty()) uiText(R.string.ui_there_is_room_for_what_you_want)
+                            else if (packed == items.size) uiText(R.string.ui_everything_is_here)
+                            else uiText(R.string.ui_of_on_board, packed, items.size),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
                         )
@@ -86,15 +86,15 @@ fun DepartureRitual(
                 }
             }
             if (items.isEmpty()) {
-                Text("Un départ à ton image.", style = MaterialTheme.typography.titleLarge)
-                Text("Un livre, une gourde, tes clés… Choisis ce qui t’accompagne.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Button(onAdd, Modifier.fillMaxWidth()) { Text("Choisir mes premiers objets") }
+                Text(uiText(R.string.ui_a_departure_that_feels_like_you), style = MaterialTheme.typography.titleLarge)
+                Text(uiText(R.string.ui_a_book_a_water_bottle_your_keys_choose_what_comes), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Button(onAdd, Modifier.fillMaxWidth()) { Text(uiText(R.string.ui_choose_my_first_objects)) }
             } else {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("À emporter", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
-                    TextButton(onAdd) { Icon(Icons.Outlined.Add, null, Modifier.size(18.dp)); Text("Un objet") }
+                    Text(uiText(R.string.ui_to_bring_along), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                    TextButton(onAdd) { Icon(Icons.Outlined.Add, null, Modifier.size(18.dp)); Text(uiText(R.string.ui_an_object)) }
                 }
-                Text("Touche un objet, ou maintiens-le pour le glisser dans le sac. Touche à nouveau pour le retirer.",
+                Text(uiText(R.string.ui_tap_an_object_or_hold_it_to_drag_it_into),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 items.chunked(2).forEach { row ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -130,7 +130,7 @@ fun DepartureRitual(
                                                 Modifier.size(21.dp), tint = if (checked) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline)
                                         }
                                         Text(item.title, style = MaterialTheme.typography.titleMedium)
-                                        Text(if (checked) "Dans le sac · retirer" else if (item.essential) "Avec moi" else "Pour aujourd’hui",
+                                        Text(if (checked) uiText(R.string.ui_in_the_bag_remove) else if (item.essential) uiText(R.string.ui_with_me) else uiText(R.string.ui_for_today),
                                             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                 }
@@ -140,11 +140,11 @@ fun DepartureRitual(
                     }
                 }
                 Button(onFinish, Modifier.fillMaxWidth().heightIn(min = 54.dp)) {
-                    Text("Je file !")
+                    Text(uiText(R.string.ui_off_i_go))
                     Spacer(Modifier.width(10.dp))
                     Icon(Icons.AutoMirrored.Outlined.ArrowForward, null, Modifier.size(20.dp))
                 }
-                Text("Ton sac, tes choix. Tu peux partir quand tu veux.", style = MaterialTheme.typography.bodySmall,
+                Text(uiText(R.string.ui_your_bag_your_choices_leave_whenever_you_want), style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }

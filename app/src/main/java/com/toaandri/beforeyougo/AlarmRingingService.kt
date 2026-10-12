@@ -52,17 +52,17 @@ class AlarmRingingService : Service() {
         releaseSound()
         current = alarm; RingingState.alarmId = alarm.id; RingingState.preview = preview
         val manager = getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(NotificationChannel(CHANNEL, "Sonneries de départ", NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "Alarmes programmées avec commandes d’arrêt et de report"
+        manager.createNotificationChannel(NotificationChannel(CHANNEL, uiText(R.string.ui_departure_sounds), NotificationManager.IMPORTANCE_HIGH).apply {
+            description = uiText(R.string.ui_scheduled_alarms_with_stop_and_snooze_controls)
             setSound(null, null); enableVibration(false)
         })
         val notification = Notification.Builder(this, CHANNEL)
-            .setSmallIcon(R.drawable.ic_alarm_notification).setContentTitle(if (preview) "Essai · ${alarm.name}" else alarm.name)
-            .setContentText(if (preview) "Ça te va comme son ?" else "On fait le tour avant de filer ?")
+            .setSmallIcon(R.drawable.ic_alarm_notification).setContentTitle(if (preview) uiText(R.string.ui_preview, alarm.name) else alarm.name)
+            .setContentText(if (preview) uiText(R.string.ui_does_this_sound_suit_you) else uiText(R.string.ui_shall_we_check_before_you_go))
             .setContentIntent(ReminderScheduler.openIntent(this, alarm.id)).setCategory(Notification.CATEGORY_ALARM)
             .setVisibility(Notification.VISIBILITY_PUBLIC).setOngoing(true)
-            .addAction(Notification.Action.Builder(null, "Arrêter la sonnerie", actionIntent(alarm.id, STOP)).build())
-            .apply { if (!preview) addAction(Notification.Action.Builder(null, "Dans ${alarm.snoozeMinutes} min", actionIntent(alarm.id, SNOOZE)).build()) }
+            .addAction(Notification.Action.Builder(null, uiText(R.string.ui_stop_the_sound), actionIntent(alarm.id, STOP)).build())
+            .apply { if (!preview) addAction(Notification.Action.Builder(null, uiText(R.string.ui_in_min, alarm.snoozeMinutes), actionIntent(alarm.id, SNOOZE)).build()) }
             .build()
         if (Build.VERSION.SDK_INT >= 29) startForeground(NOTIFICATION, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
         else startForeground(NOTIFICATION, notification)

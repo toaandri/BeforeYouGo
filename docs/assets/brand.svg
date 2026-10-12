@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+<title id="title">BeforeYouGo</title>
+<desc id="desc">A small ritual before you go. At your own pace. An offline Android companion.</desc>
+<rect width="1200" height="360" rx="16" fill="#FAF5EB"/>
+<path d="M0 308H1200" stroke="#DDD3C2"/>
+<path d="M1020 0V360" stroke="#DDD3C2"/>
+<text x="68" y="73" font-family="Arial, sans-serif" font-size="14" letter-spacing="3" fill="#596B52">AN EVERYDAY COMPANION</text>
+<text x="64" y="158" font-family="Georgia, serif" font-size="68" fill="#302D28">BeforeYouGo</text>
+<text x="68" y="215" font-family="Arial, sans-serif" font-size="23" fill="#635B50">A small ritual before you go. At your own pace.</text>
+<text x="68" y="280" font-family="Arial, sans-serif" font-size="15" fill="#87513C">ANDROID · OFFLINE · ENGLISH / FRANÇAIS</text>
+<svg x="839" y="74" width="176" height="176" viewBox="0 0 108 108"><path fill="#0C2136" d="M35,31C35,27.7 37.7,25 41,25H71C74.3,25 77,27.7 77,31V81C77,84.3 74.3,87 71,87H35C31.7,87 29,84.3 29,81V37C29,33.7 31.7,31 35,31z"/>
+<path fill="#FFF7EB" d="M34,27C34,23.7 36.7,21 40,21H68C71.3,21 74,23.7 74,27V77C74,80.3 71.3,83 68,83H34C30.7,83 28,80.3 28,77V33C28,29.7 30.7,27 34,27z"/>
+<path fill="#F4B63E" d="M45,18C45,15.8 46.8,14 49,14H57C59.2,14 61,15.8 61,18V23H45z"/>
+<path fill="#F4B63E" d="M33,34C33,31.8 34.8,30 37,30H40C42.2,30 44,31.8 44,34V37C44,39.2 42.2,41 40,41H37C34.8,41 33,39.2 33,37z"/>
+<path fill="#35BFA8" d="M36.5,36L38.5,38L42,33.5L43.7,35.1L38.5,41L34.8,37.6z"/>
+<path fill="#2A516D" d="M48,33H66C67.1,33 68,33.9 68,35C68,36.1 67.1,37 66,37H48C46.9,37 46,36.1 46,35C46,33.9 46.9,33 48,33z"/>
+<path fill="#2A516D" d="M34,47H66C67.1,47 68,47.9 68,49C68,50.1 67.1,51 66,51H34C32.9,51 32,50.1 32,49C32,47.9 32.9,47 34,47z"/>
+<path fill="#2A516D" d="M34,56H62C63.1,56 64,56.9 64,58C64,59.1 63.1,60 62,60H34C32.9,60 32,59.1 32,58C32,56.9 32.9,56 34,56z"/>
+<path fill="#35BFA8" d="M55,65C55,60.6 58.6,57 63,57C67.4,57 71,60.6 71,65C71,69.4 67.4,73 63,73C58.6,73 55,69.4 55,65z"/>
+<path fill="#16324F" d="M59.1,64.4L61.7,67L67.3,61.3L68.9,62.9L61.7,70L57.5,66z"/></svg>
+<text x="68" y="339" font-family="Arial, sans-serif" font-size="12" letter-spacing="2" fill="#635B50">DESIGNED FOR THE MOMENT BEFORE YOU LEAVE</text>
+</svg>

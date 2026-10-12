@@ -27,8 +27,8 @@ class DepartureUiTest {
                 AlarmEditor(DepartureAlarm(91, name = "Sport", days = setOf(1)), emptyList(), {}) { result = it }
             }
         }
-        compose.onNodeWithText("Mar", useUnmergedTree = true).performScrollTo().performClick()
-        compose.onNodeWithText("Enregistrer ce départ").performClick()
+        compose.onNodeWithText("Tue", useUnmergedTree = true).performScrollTo().performClick()
+        compose.onNodeWithText("Save this departure").performClick()
         compose.runOnIdle { assertEquals(setOf(1, 2), result!!.days); assertEquals("Sport", result!!.name) }
     }
 
@@ -41,17 +41,17 @@ class DepartureUiTest {
                 })
             }
         }
-        compose.onNodeWithText("Piocher des idées").performClick()
-        compose.onNodeWithText("Rechercher un objet").performTextInput("parapluie")
-        compose.onNodeWithText("Parapluie").performClick()
-        compose.onNodeWithText("✓ Dans ma collection").assertExists()
+        compose.onNodeWithText("Browse ideas").performClick()
+        compose.onNodeWithText("Search objects").performTextInput("umbrella")
+        compose.onNodeWithText("Umbrella").performClick()
+        compose.onNodeWithText("✓ In my collection").assertExists()
         compose.runOnIdle { assertEquals("umbrella", selected.value.single().iconKey) }
     }
 
     @Test fun packingIsReversibleAndLeavingDoesNotCheckOtherItems() {
         var checks by mutableStateOf<Map<Long, Boolean>>(emptyMap())
         var left = false
-        val items = listOf(SavedItem(1, "Clés", true, null), SavedItem(2, "Gourde", true, null))
+        val items = listOf(SavedItem(1, "Keys", true, null), SavedItem(2, "Water bottle", true, null))
         compose.setContent {
             BeforeYouGoTheme {
                 Column(Modifier.width(320.dp).verticalScroll(rememberScrollState())) {
@@ -62,7 +62,7 @@ class DepartureUiTest {
         compose.onNodeWithTag("pack-1").performScrollTo().performClick().assertIsOn()
         compose.onNodeWithTag("pack-1").performClick().assertIsOff()
         compose.onNodeWithTag("pack-2").assertIsOff()
-        compose.onNodeWithText("Je file !").performScrollTo().performClick()
+        compose.onNodeWithText("Off I go!").performScrollTo().performClick()
         compose.runOnIdle { assertTrue(left); assertFalse(checks.values.any { it }) }
     }
 
@@ -71,7 +71,7 @@ class DepartureUiTest {
         compose.setContent {
             BeforeYouGoTheme {
                 Column(Modifier.width(320.dp).verticalScroll(rememberScrollState())) {
-                    DepartureRitual(listOf(SavedItem(1, "Clés", true, null)), checks,
+                    DepartureRitual(listOf(SavedItem(1, "Keys", true, null)), checks,
                         { id, checked -> checks = checks + (id to checked) }, {}, {})
                 }
             }

@@ -15,6 +15,8 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,26 +34,26 @@ import java.util.Locale
 fun ObjectsScreen(objects: List<SavedItem>, modifier: Modifier, onEdit: (SavedItem) -> Unit, onDelete: (SavedItem) -> Unit, onAdd: (CatalogObject) -> Unit) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var query by rememberSaveable { mutableStateOf("") }
-    var category by rememberSaveable { mutableStateOf("Tous") }
+    var category by rememberSaveable { mutableStateOf<Int?>(null) }
     var deleting by remember { mutableStateOf<SavedItem?>(null) }
-    val categories = listOf("Tous") + objectCatalog.map { it.category }.distinct()
-    val filtered = objectCatalog.filter { (category == "Tous" || it.category == category) && normalized(it.name).contains(normalized(query)) }
+    val categories = listOf<Int?>(null) + objectCatalog.map { it.categoryResource }.distinct()
+    val filtered = objectCatalog.filter { (category == null || it.categoryResource == category) && normalized(it.name).contains(normalized(query)) }
     Column(modifier.fillMaxSize()) {
         Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("LES PETITES AFFAIRES", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, letterSpacing = 2.sp)
-            Text("Tout un petit monde.", style = MaterialTheme.typography.headlineLarge, fontFamily = FontFamily.Serif)
-            Text("Tes essentiels, tes envies, ce qui vient avec toi.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(uiText(R.string.ui_the_little_things), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, letterSpacing = 2.sp)
+            Text(uiText(R.string.ui_a_little_world_of_your_own), style = MaterialTheme.typography.headlineLarge, fontFamily = FontFamily.Serif)
+            Text(uiText(R.string.ui_your_essentials_your_wishes_what_comes_with_you), color = MaterialTheme.colorScheme.onSurfaceVariant)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(tab == 0, { tab = 0 }, label = { Text("Ma collection · ${objects.size}") })
-                FilterChip(tab == 1, { tab = 1 }, label = { Text("Piocher des idées") })
+                FilterChip(tab == 0, { tab = 0 }, label = { Text(uiText(R.string.ui_my_collection, objects.size)) })
+                FilterChip(tab == 1, { tab = 1 }, label = { Text(uiText(R.string.ui_browse_ideas)) })
             }
-            OutlinedTextField(query, { query = it }, Modifier.fillMaxWidth(), label = { Text("Rechercher un objet") },
+            OutlinedTextField(query, { query = it }, Modifier.fillMaxWidth(), label = { Text(uiText(R.string.ui_search_objects)) },
                 leadingIcon = { Icon(Icons.Outlined.Search, null) },
-                trailingIcon = { if (query.isNotEmpty()) IconButton({ query = "" }) { Icon(Icons.Outlined.Close, "Effacer la recherche") } },
+                trailingIcon = { if (query.isNotEmpty()) IconButton({ query = "" }) { Icon(Icons.Outlined.Close, uiText(R.string.ui_clear_search)) } },
                 singleLine = true, shape = RoundedCornerShape(18.dp))
         }
         if (tab == 1) Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            categories.forEach { name -> FilterChip(category == name, { category = name }, label = { Text(name) }) }
+            categories.forEach { name -> FilterChip(category == name, { category = name }, label = { Text(uiText(name ?: R.string.ui_all)) }) }
         }
         LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 96.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (tab == 0) {
@@ -59,10 +61,10 @@ fun ObjectsScreen(objects: List<SavedItem>, modifier: Modifier, onEdit: (SavedIt
                 if (found.isEmpty()) item {
                     Panel {
                         Icon(Icons.Outlined.AutoStories, null, Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
-                        Text(if (objects.isEmpty()) "La première page est à toi." else "Rien sous ce nom, pour l’instant.",
+                        Text(if (objects.isEmpty()) uiText(R.string.ui_the_first_page_is_yours) else uiText(R.string.ui_nothing_under_that_name_for_now),
                             style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
-                        Text(if (objects.isEmpty()) "Pioche quelques idées ou crée ton propre objet avec le +." else "Essaie un autre mot, ou ajoute cet objet avec le +.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        if (objects.isEmpty()) TextButton({ tab = 1 }) { Text("Explorer les idées") }
+                        Text(if (objects.isEmpty()) uiText(R.string.ui_browse_a_few_ideas_or_create_your_own_object_with) else uiText(R.string.ui_try_another_word_or_add_this_object_with), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        if (objects.isEmpty()) TextButton({ tab = 1 }) { Text(uiText(R.string.ui_explore_the_ideas)) }
                     }
                 }
                 items(found, key = { it.id }) { item ->
@@ -71,26 +73,26 @@ fun ObjectsScreen(objects: List<SavedItem>, modifier: Modifier, onEdit: (SavedIt
                         Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                             ObjectBadge(iconFor(item))
                             Spacer(Modifier.width(12.dp))
-                            Column(Modifier.weight(1f).clickable(onClickLabel = "Modifier ${item.title}") { onEdit(item) }, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Column(Modifier.weight(1f).clickable(onClickLabel = uiText(R.string.ui_edit, item.title)) { onEdit(item) }, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Text(item.title, fontWeight = FontWeight.SemiBold)
-                                Text(if (item.essential) "Au quotidien" else "À partir du ${friendlyObjectDate(item.dueDate)}",
+                                Text(if (item.essential) uiText(R.string.ui_every_day_e8bdcc) else uiText(R.string.ui_from, friendlyObjectDate(item.dueDate)),
                                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            IconButton({ onEdit(item) }) { Icon(Icons.Outlined.Edit, "Modifier ${item.title}") }
-                            IconButton({ deleting = item }) { Icon(Icons.Outlined.DeleteOutline, "Supprimer ${item.title}", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                            IconButton({ onEdit(item) }) { Icon(Icons.Outlined.Edit, uiText(R.string.ui_edit, item.title)) }
+                            IconButton({ deleting = item }) { Icon(Icons.Outlined.DeleteOutline, uiText(R.string.ui_delete_b7c5a9, item.title), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                         }
                     }
                 }
             } else {
-                item { Text("${filtered.size} idées à faire tiennes", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                item { Text(uiText(R.string.ui_ideas_to_make_your_own, filtered.size), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 if (filtered.isEmpty()) item { Panel {
-                    Text("Pas encore d’idée sous ce nom.", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
-                    Text("Change de catégorie ou crée ton propre objet avec le +.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(uiText(R.string.ui_no_idea_under_that_name_yet), style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.Serif)
+                    Text(uiText(R.string.ui_choose_another_category_or_create_your_own_object_with), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } }
                 items(filtered.chunked(2)) { pair ->
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         pair.forEach { idea ->
-                            val added = objects.any { normalized(it.title) == normalized(idea.name) }
+                            val added = objects.any { idea.matchesTitle(it.title) }
                             val cardColor by animateColorAsState(if (added) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface, label = "collectionCard")
                             Card(onClick = { onAdd(idea) }, enabled = !added, modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(topStart = 8.dp, topEnd = 24.dp, bottomEnd = 24.dp, bottomStart = 24.dp),
@@ -101,7 +103,7 @@ fun ObjectsScreen(objects: List<SavedItem>, modifier: Modifier, onEdit: (SavedIt
                                         Icon(if (added) Icons.Outlined.Check else Icons.Outlined.Add, null, Modifier.size(19.dp), tint = MaterialTheme.colorScheme.primary)
                                     }
                                     Text(idea.name, fontWeight = FontWeight.SemiBold)
-                                    Text(if (added) "✓ Dans ma collection" else "Je l’emporte", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                                    Text(if (added) uiText(R.string.ui_in_my_collection) else uiText(R.string.ui_i_ll_bring_it), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                                 }
                             }
                         }
@@ -112,10 +114,10 @@ fun ObjectsScreen(objects: List<SavedItem>, modifier: Modifier, onEdit: (SavedIt
         }
     }
     deleting?.let { item ->
-        AlertDialog(onDismissRequest = { deleting = null }, title = { Text("Retirer cet objet ?", fontFamily = FontFamily.Serif) },
-            text = { Text("« ${item.title} » quittera ta collection et les sacs de tes départs.") },
-            confirmButton = { TextButton({ onDelete(item); deleting = null }) { Text("Retirer") } },
-            dismissButton = { TextButton({ deleting = null }) { Text("Garder") } })
+        AlertDialog(onDismissRequest = { deleting = null }, title = { Text(uiText(R.string.ui_remove_this_object), fontFamily = FontFamily.Serif) },
+            text = { Text(uiText(R.string.ui_will_leave_your_collection_and_departure_bags, item.title)) },
+            confirmButton = { TextButton({ onDelete(item); deleting = null }) { Text(uiText(R.string.ui_remove)) } },
+            dismissButton = { TextButton({ deleting = null }) { Text(uiText(R.string.ui_keep)) } })
     }
 }
 
@@ -129,19 +131,19 @@ fun ObjectEditor(item: SavedItem, onDismiss: () -> Unit, onSave: (SavedItem) -> 
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.background) {
             Column(Modifier.fillMaxWidth().heightIn(max = 640.dp).padding(20.dp)) {
-                Text(if (item.title.isEmpty()) "Une chose à emporter" else "Un objet à ta façon", style = MaterialTheme.typography.headlineSmall, fontFamily = FontFamily.Serif)
+                Text(if (item.title.isEmpty()) uiText(R.string.ui_something_to_bring) else uiText(R.string.ui_an_object_your_way), style = MaterialTheme.typography.headlineSmall, fontFamily = FontFamily.Serif)
                 LazyColumn(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(14.dp), contentPadding = PaddingValues(vertical = 16.dp)) {
                     item {
-                        OutlinedTextField(title, { title = it.take(80) }, Modifier.fillMaxWidth(), label = { Text("Son petit nom") },
-                            placeholder = { Text("Mon carnet, le livre de Léa…") }, singleLine = true, shape = RoundedCornerShape(18.dp))
+                        OutlinedTextField(title, { title = it.take(80) }, Modifier.fillMaxWidth(), label = { Text(uiText(R.string.ui_its_name)) },
+                            placeholder = { Text(uiText(R.string.ui_my_notebook_lea_s_book)) }, singleLine = true, shape = RoundedCornerShape(18.dp))
                     }
                     item {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text("Un compagnon du quotidien", fontWeight = FontWeight.SemiBold)
-                                Text(if (essential) "Il retrouve sa place chaque jour." else "Pour une occasion particulière.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(uiText(R.string.ui_an_everyday_companion), fontWeight = FontWeight.SemiBold)
+                                Text(if (essential) uiText(R.string.ui_it_finds_its_place_every_day) else uiText(R.string.ui_for_a_particular_occasion), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            Switch(essential, { essential = it })
+                            Switch(essential, { essential = it }, Modifier.semantics { contentDescription = uiText(R.string.ui_an_everyday_companion) })
                         }
                     }
                     if (!essential) item {
@@ -152,12 +154,12 @@ fun ObjectEditor(item: SavedItem, onDismiss: () -> Unit, onSave: (SavedItem) -> 
                             }, Modifier.fillMaxWidth()) {
                                 Icon(Icons.Outlined.CalendarToday, null, Modifier.size(18.dp))
                                 Spacer(Modifier.width(8.dp))
-                                Text("À partir du ${friendlyObjectDate(date)}")
+                                Text(uiText(R.string.ui_from_ccd57b, friendlyObjectDate(date)))
                             }
-                            Text("Il apparaîtra à partir de cette date et restera disponible jusqu’au lendemain de ta confirmation.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(uiText(R.string.ui_it_appears_from_this_date_and_stays_available_until_the), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
-                    item { Text("Le détail qui lui ressemble", style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Serif) }
+                    item { Text(uiText(R.string.ui_the_detail_that_suits_it), style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Serif) }
                     items(objectCatalog.chunked(4)) { row ->
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                             row.forEach { idea ->
@@ -167,9 +169,9 @@ fun ObjectEditor(item: SavedItem, onDismiss: () -> Unit, onSave: (SavedItem) -> 
                     }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onDismiss) { Text("Annuler") }
+                    TextButton(onDismiss) { Text(uiText(R.string.ui_cancel)) }
                     Button({ onSave(item.copy(title = title.trim(), essential = essential, dueDate = if (essential) null else date, iconKey = icon)) }, enabled = title.isNotBlank()) {
-                        Text(if (item.title.isEmpty()) "Ajouter" else "Enregistrer")
+                        Text(if (item.title.isEmpty()) uiText(R.string.ui_add) else uiText(R.string.ui_save))
                     }
                 }
             }
@@ -178,5 +180,5 @@ fun ObjectEditor(item: SavedItem, onDismiss: () -> Unit, onSave: (SavedItem) -> 
 }
 
 private fun friendlyObjectDate(value: String?): String = runCatching {
-    LocalDate.parse(value).format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.FRENCH))
+    LocalDate.parse(value).format(DateTimeFormatter.ofPattern("d MMM yyyy", AppText.locale))
 }.getOrElse { value.orEmpty() }

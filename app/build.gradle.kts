@@ -19,6 +19,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Both choices must be available offline after installation from an App Bundle.
+    bundle {
+        language { enableSplit = false }
+    }
+
     buildTypes {
         release {
             optimization {

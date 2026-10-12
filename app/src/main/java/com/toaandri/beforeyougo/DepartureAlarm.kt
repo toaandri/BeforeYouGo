@@ -2,21 +2,23 @@ package com.toaandri.beforeyougo
 
 import java.time.ZonedDateTime
 
-enum class DeliveryMode(val label: String, val description: String) {
-    RING("Avec sonnerie", "Un signal sonore si tu en as envie. Tu peux l’arrêter ou le reporter."),
-    NOTIFICATION("Petit signe", "Une invitation silencieuse à faire le tour. À ouvrir quand tu veux.")
+enum class DeliveryMode(private val labelResource: Int, private val descriptionResource: Int) {
+    RING(R.string.ui_with_a_sound, R.string.ui_a_sound_if_you_want_one_stop_or_snooze_it),
+    NOTIFICATION(R.string.ui_quiet_nudge, R.string.ui_a_quiet_invitation_to_check_your_bag_open_it_when);
+    val label: String get() = uiText(labelResource)
+    val description: String get() = uiText(descriptionResource)
 }
 
 data class DepartureAlarm(
     val id: Long,
-    val name: String = "Mon départ",
+    val name: String = uiText(R.string.ui_my_departure),
     val hour: Int = 8,
     val minute: Int = 0,
     val days: Set<Int> = (1..5).toSet(),
     val enabled: Boolean = true,
     val deliveryMode: DeliveryMode = DeliveryMode.NOTIFICATION,
     val soundUri: String = "default",
-    val soundName: String = "Sonnerie du téléphone",
+    val soundName: String = uiText(R.string.ui_phone_ringtone),
     val vibrate: Boolean = true,
     val snoozeMinutes: Int = 5,
     val itemIds: Set<Long> = emptySet(),
@@ -41,8 +43,15 @@ fun itemsForAlarm(items: List<SavedItem>, alarm: DepartureAlarm, day: java.time.
     itemsForDay(items, day).filter { alarm.allItems || it.id in alarm.itemIds }
 
 fun daysLabel(days: Set<Int>): String = when (days) {
-    (1..7).toSet() -> "Tous les jours"
-    (1..5).toSet() -> "Du lundi au vendredi"
-    setOf(6, 7) -> "Le week-end"
-    else -> days.sorted().joinToString(" · ") { listOf("Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim")[it - 1] }
+    (1..7).toSet() -> uiText(R.string.ui_every_day)
+    (1..5).toSet() -> uiText(R.string.ui_monday_to_friday)
+    setOf(6, 7) -> uiText(R.string.ui_at_the_weekend)
+    else -> days.sorted().joinToString(" · ") { listOf(uiText(R.string.ui_mon), uiText(R.string.ui_tue), uiText(R.string.ui_wed), uiText(R.string.ui_thu), uiText(R.string.ui_fri), uiText(R.string.ui_sat), uiText(R.string.ui_sun))[it - 1] }
 }
+
+val DepartureAlarm.displaySoundName: String
+    get() = when (soundUri) {
+        "default" -> uiText(R.string.ui_phone_ringtone)
+        "silent" -> uiText(R.string.ui_silent)
+        else -> soundName
+    }

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BeforeYouGo</string>
+    <string name="ui_custom_ringtone" formatted="false">Sonnerie personnalisée</string>
+    <string name="ui_a_departure_page" formatted="false">Une page de départ</string>
+    <string name="ui_where_are_we_going" formatted="false">On part où ?</string>
+    <string name="ui_a_small_ritual_before_you_go_at_your_own_pace" formatted="false">Un petit rituel avant de filer. À ton rythme.</string>
+    <string name="ui_name_this_departure" formatted="false">Ce départ s’appelle…</string>
+    <string name="ui_work_a_weekend_away_a_workout" formatted="false">Bureau, escapade, séance de sport…</string>
+    <string name="ui_when_should_we_give_you_a_nudge" formatted="false">À quelle heure te faire signe ?</string>
+    <string name="ui_change_departure_time" formatted="false">Changer l’heure du départ</string>
+    <string name="ui_choose_your_moment_a_little_before_leaving_if_you_prefer" formatted="false">Choisis ton moment, un peu avant de partir si tu préfères.</string>
+    <string name="ui_the_days_that_fit" formatted="false">Les jours qui vont avec</string>
+    <string name="ui_mon" formatted="false">Lun</string>
+    <string name="ui_tue" formatted="false">Mar</string>
+    <string name="ui_wed" formatted="false">Mer</string>
+    <string name="ui_thu" formatted="false">Jeu</string>
+    <string name="ui_fri" formatted="false">Ven</string>
+    <string name="ui_sat" formatted="false">Sam</string>
+    <string name="ui_sun" formatted="false">Dim</string>
+    <string name="ui_every_day" formatted="false">Tous les jours</string>
+    <string name="ui_a_sound_with_stop_and_snooze_controls" formatted="false">Un signal sonore, avec arrêt et report à la demande.</string>
+    <string name="ui_a_quick_check_then_off_you_go">%1$s · Un petit tour et tu files.</string>
+    <string name="ui_your_departure" formatted="false">Ton départ</string>
+    <string name="ui_sound_your_way" formatted="false">Le son à ta façon</string>
+    <string name="ui_departure_sound" formatted="false">Son de ce départ</string>
+    <string name="ui_the_ringtone_picker_is_unavailable_on_this_phone" formatted="false">Le sélecteur de sonnerie n’est pas disponible sur ce téléphone.</string>
+    <string name="ui_with_these_settings_only_a_notification_will_appear" formatted="false">Avec ces réglages, seule la notification s’affichera.</string>
+    <string name="ui_how_long_to_wait_when_you_want_to_come_back" formatted="false">La durée du report quand tu préfères y revenir plus tard.</string>
+    <string name="ui_to_bring_along" formatted="false">À emporter</string>
+    <string name="ui_new_objects_also_join_this_departure_starting_on_their_chosen" formatted="false">Les nouveaux objets rejoignent aussi ce départ, à partir de la date choisie.</string>
+    <string name="ui_compose_this_departure_bag_dated_objects_appear_from_their_scheduled" formatted="false">Compose le sac de ce départ. Les objets datés apparaîtront à partir du jour prévu.</string>
+    <string name="ui_object_selected">%1$s objet choisi</string>
+    <string name="ui_save_this_departure" formatted="false">Enregistrer ce départ</string>
+    <string name="ui_departure_sounds" formatted="false">Sonneries de départ</string>
+    <string name="ui_scheduled_alarms_with_stop_and_snooze_controls" formatted="false">Alarmes programmées avec commandes d’arrêt et de report</string>
+    <string name="ui_stop_the_sound" formatted="false">Arrêter la sonnerie</string>
+    <string name="ui_phone_ringtone" formatted="false">Sonnerie du téléphone</string>
+    <string name="ui_follow_system" formatted="false">Système</string>
+    <string name="ui_light" formatted="false">Clair</string>
+    <string name="ui_dark" formatted="false">Sombre</string>
+    <string name="ui_a_sound_if_you_want_one_stop_or_snooze_it" formatted="false">Un signal sonore si tu en as envie. Tu peux l’arrêter ou le reporter.</string>
+    <string name="ui_a_quiet_invitation_to_check_your_bag_open_it_when" formatted="false">Une invitation silencieuse à faire le tour. À ouvrir quand tu veux.</string>
+    <string name="ui_my_departure" formatted="false">Mon départ</string>
+    <string name="ui_my_bag_for_today" formatted="false">Mon sac du jour</string>
+    <string name="ui_everything_is_here" formatted="false">Tout ton petit monde est là.</string>
+    <string name="ui_of_on_board">%1$s sur %2$s à bord</string>
+    <string name="ui_a_departure_that_feels_like_you" formatted="false">Un départ à ton image.</string>
+    <string name="ui_a_book_a_water_bottle_your_keys_choose_what_comes" formatted="false">Un livre, une gourde, tes clés… Choisis ce qui t’accompagne.</string>
+    <string name="ui_choose_my_first_objects" formatted="false">Choisir mes premiers objets</string>
+    <string name="ui_an_object" formatted="false">Un objet</string>
+    <string name="ui_tap_an_object_or_hold_it_to_drag_it_into" formatted="false">Touche un objet, ou maintiens-le pour le glisser dans le sac. Touche à nouveau pour le retirer.</string>
+    <string name="ui_in_the_bag_remove" formatted="false">Dans le sac · retirer</string>
+    <string name="ui_your_bag_your_choices_leave_whenever_you_want" formatted="false">Ton sac, tes choix. Tu peux partir quand tu veux.</string>
+    <string name="ui_your_departure_is_saved_invitations_are_disabled_your_bag_is" formatted="false">Ton départ est enregistré. Les invitations sont désactivées ; ton sac reste accessible à tout moment.</string>
+    <string name="ui_your_departure_is_saved_allow_exact_alarms_in_android_to" formatted="false">Ton départ est enregistré. Pour recevoir le petit signe à l’heure choisie, autorise les alarmes exactes dans Android. Tu peux aussi utiliser ton sac sans notification.</string>
+    <string name="ui_my_preferences" formatted="false">À ma façon</string>
+    <string name="ui_add_a_personal_object" formatted="false">Ajouter un objet personnel</string>
+    <string name="ui_back_to_today_s_bag" formatted="false">Revenir au sac du jour</string>
+    <string name="ui_your_departure_57fd9c">Ton départ · %1$s</string>
+    <string name="ui_your_departures_are_saved_enable_the_android_permissions_to_receive" formatted="false">Tes départs sont enregistrés. Pour recevoir leurs invitations, il reste les autorisations Android à activer.</string>
+    <string name="ui_choose_my_permissions" formatted="false">Choisir mes autorisations</string>
+    <string name="ui_your_bag_appointments" formatted="false">Les rendez-vous du sac</string>
+    <string name="ui_a_little_nudge_when_it_suits_you" formatted="false">Un petit signe, quand ça t’arrange.</string>
+    <string name="ui_plan_a_departure" formatted="false">Imaginer un départ</string>
+    <string name="ui_the_next_part_is_yours" formatted="false">La suite est à toi.</string>
+    <string name="ui_your_bag_is_ready_have_a_good_journey" formatted="false">Ton sac est prêt. Bonne route !</string>
+    <string name="ui_have_a_good_journey_your_bag_will_be_here_whenever" formatted="false">Bonne route ! Tu retrouveras ton sac ici quand tu veux.</string>
+    <string name="ui_see_you_soon" formatted="false">À tout à l’heure</string>
+    <string name="ui_delete">Supprimer « %1$s » ?</string>
+    <string name="ui_this_appointment_will_be_cancelled_your_objects_stay_in_your" formatted="false">Ce rendez-vous sera annulé. Tes objets restent dans ta collection.</string>
+    <string name="ui_delete_16ce0b" formatted="false">Supprimer</string>
+    <string name="ui_cancel" formatted="false">Annuler</string>
+    <string name="ui_your_departure_is_saved" formatted="false">Ton départ est enregistré</string>
+    <string name="ui_open_settings" formatted="false">Ouvrir les réglages</string>
+    <string name="ui_open_this_bag" formatted="false">Ouvrir ce sac</string>
+    <string name="ui">%1$s · %2$s</string>
+    <string name="ui_vibration" formatted="false">Vibration</string>
+    <string name="ui_delete_ecb441">Supprimer %1$s</string>
+    <string name="ui_cancel_the_current_snooze" formatted="false">Annuler le report en cours</string>
+    <string name="ui_restore_the_next_appointment" formatted="false">Rétablir le prochain rendez-vous</string>
+    <string name="ui_try_the_sound_10_s" formatted="false">Écouter un essai · 10 s</string>
+    <string name="ui_your_way" formatted="false">À ta façon.</string>
+    <string name="ui_your_bag_is_available_even_without_notifications" formatted="false">Ton sac reste disponible même sans notification.</string>
+    <string name="ui_exact_alarms">Alarmes exactes : %1$s</string>
+    <string name="ui_allowed" formatted="false">autorisées</string>
+    <string name="ui_permission_needed" formatted="false">à autoriser</string>
+    <string name="ui_notifications">Notifications : %1$s</string>
+    <string name="ui_notification_settings" formatted="false">Réglages des notifications</string>
+    <string name="ui_new_departures_use_a_quiet_nudge_by_default_you_can" formatted="false">Les nouveaux départs proposent un petit signe silencieux. Tu peux choisir une sonnerie pour chacun : volume Alarme, arrêt automatique après 2 minutes et essai de 10 secondes.</string>
+    <string name="ui_phone_volume_and_sounds" formatted="false">Volume et sons du téléphone</string>
+    <string name="ui_your_rhythm_your_departures" formatted="false">Ton rythme, tes départs</string>
+    <string name="ui_in_my_departure_plan_an_appointment_for_work_swimming_or" formatted="false">Dans Mon départ, imagine un rendez-vous pour le bureau, la piscine ou les virées du week-end. À chacun ses jours et ses objets. Tu peux passer un rendez-vous, mettre un départ en pause ou reporter une invitation.</string>
+    <string name="ui_no_account_ads_or_tracking_your_objects_and_departures_stay" formatted="false">Sans compte, publicité ni suivi. Tes objets et tes départs restent sur ce téléphone. Une désinstallation les efface.</string>
+    <string name="ui_essentials" formatted="false">Essentiels</string>
+    <string name="ui_headphones" formatted="false">Écouteurs</string>
+    <string name="ui_keys" formatted="false">Clés</string>
+    <string name="ui_wallet" formatted="false">Portefeuille</string>
+    <string name="ui_phone" formatted="false">Téléphone</string>
+    <string name="ui_watch" formatted="false">Montre</string>
+    <string name="ui_backpack" formatted="false">Sac à dos</string>
+    <string name="ui_work_study" formatted="false">Travail &amp; études</string>
+    <string name="ui_notebook" formatted="false">Carnet</string>
+    <string name="ui_pen" formatted="false">Stylo</string>
+    <string name="ui_usb_drive" formatted="false">Clé USB</string>
+    <string name="ui_documents" formatted="false">Documents</string>
+    <string name="ui_water_bottle" formatted="false">Gourde</string>
+    <string name="ui_wellbeing" formatted="false">Bien-être</string>
+    <string name="ui_lunch" formatted="false">Repas</string>
+    <string name="ui_medication" formatted="false">Médicaments</string>
+    <string name="ui_hand_sanitizer" formatted="false">Gel désinfectant</string>
+    <string name="ui_sunscreen" formatted="false">Crème solaire</string>
+    <string name="ui_umbrella" formatted="false">Parapluie</string>
+    <string name="ui_passport" formatted="false">Passeport</string>
+    <string name="ui_tickets" formatted="false">Billets</string>
+    <string name="ui_suitcase" formatted="false">Valise</string>
+    <string name="ui_sport_family" formatted="false">Sport &amp; famille</string>
+    <string name="ui_bike_helmet" formatted="false">Casque vélo</string>
+    <string name="ui_towel" formatted="false">Serviette</string>
+    <string name="ui_changing_bag" formatted="false">Sac à langer</string>
+    <string name="ui_leash" formatted="false">Laisse</string>
+    <string name="ui_snack" formatted="false">Goûter</string>
+    <string name="ui_comfort_toy" formatted="false">Doudou</string>
+    <string name="ui_all" formatted="false">Tous</string>
+    <string name="ui_browse_ideas" formatted="false">Piocher des idées</string>
+    <string name="ui_search_objects" formatted="false">Rechercher un objet</string>
+    <string name="ui_the_first_page_is_yours" formatted="false">La première page est à toi.</string>
+    <string name="ui_browse_a_few_ideas_or_create_your_own_object_with" formatted="false">Pioche quelques idées ou crée ton propre objet avec le +.</string>
+    <string name="ui_try_another_word_or_add_this_object_with" formatted="false">Essaie un autre mot, ou ajoute cet objet avec le +.</string>
+    <string name="ui_explore_the_ideas" formatted="false">Explorer les idées</string>
+    <string name="ui_from">À partir du %1$s</string>
+    <string name="ui_delete_b7c5a9">Supprimer %1$s</string>
+    <string name="ui_ideas_to_make_your_own">%1$s idées à faire tiennes</string>
+    <string name="ui_no_idea_under_that_name_yet" formatted="false">Pas encore d’idée sous ce nom.</string>
+    <string name="ui_choose_another_category_or_create_your_own_object_with" formatted="false">Change de catégorie ou crée ton propre objet avec le +.</string>
+    <string name="ui_remove_this_object" formatted="false">Retirer cet objet ?</string>
+    <string name="ui_will_leave_your_collection_and_departure_bags">« %1$s » quittera ta collection et les sacs de tes départs.</string>
+    <string name="ui_something_to_bring" formatted="false">Une chose à emporter</string>
+    <string name="ui_an_object_your_way" formatted="false">Un objet à ta façon</string>
+    <string name="ui_my_notebook_lea_s_book" formatted="false">Mon carnet, le livre de Léa…</string>
+    <string name="ui_for_a_particular_occasion" formatted="false">Pour une occasion particulière.</string>
+    <string name="ui_from_ccd57b">À partir du %1$s</string>
+    <string name="ui_it_appears_from_this_date_and_stays_available_until_the" formatted="false">Il apparaîtra à partir de cette date et restera disponible jusqu’au lendemain de ta confirmation.</string>
+    <string name="ui_the_detail_that_suits_it" formatted="false">Le détail qui lui ressemble</string>
+    <string name="ui_save" formatted="false">Enregistrer</string>
+    <string name="ui_quiet_departure_nudges" formatted="false">Petits signes de départ</string>
+    <string name="ui_quiet_invitations_to_check_your_bag_before_leaving" formatted="false">Des invitations silencieuses à faire le tour avant de partir</string>
+    <string name="ui_open_my_departure" formatted="false">Ouvrir mon départ</string>
+    <string name="ui_silent" formatted="false">Silencieux</string>
+    <string name="ui_close" formatted="false">Fermer</string>
+    <string name="ui_the_appointment" formatted="false">LE RENDEZ-VOUS</string>
+    <string name="ui_weekdays" formatted="false">Semaine</string>
+    <string name="ui_weekend" formatted="false">Week-end</string>
+    <string name="ui_choose_at_least_one_day_for_this_appointment" formatted="false">Choisis au moins un jour pour ce rendez-vous.</string>
+    <string name="ui_your_little_nudge" formatted="false">Ton petit signe</string>
+    <string name="ui_quiet_or_with_a_sound_you_choose" formatted="false">Discret ou sonore, c’est toi qui choisis.</string>
+    <string name="ui_a_quiet_note" formatted="false">Un mot discret</string>
+    <string name="ui_a_sound" formatted="false">Une sonnerie</string>
+    <string name="ui_a_notification_without_sound_or_vibration" formatted="false">Une notification, sans son ni vibration.</string>
+    <string name="ui_a_preview_of_the_tone" formatted="false">UN APERÇU DU TON</string>
+    <string name="ui_shall_we_check_the_bag" formatted="false">On fait le tour ?</string>
+    <string name="ui_with_vibration" formatted="false">Avec une vibration</string>
+    <string name="ui_a_few_more_minutes" formatted="false">Encore quelques minutes ?</string>
+    <string name="ui_min">%1$s min</string>
+    <string name="ui_my_whole_daily_collection" formatted="false">Toute ma collection du jour</string>
+    <string name="ui_your_collection_is_empty_add_objects_in_the_my_objects" formatted="false">Ta collection est encore vide. Tu peux la composer dans l’onglet Mes objets.</string>
+    <string name="ui_objects_selected">%1$s objets choisis</string>
+    <string name="ui_preview">Essai · %1$s</string>
+    <string name="ui_does_this_sound_suit_you" formatted="false">Ça te va comme son ?</string>
+    <string name="ui_shall_we_check_before_you_go" formatted="false">On fait le tour avant de filer ?</string>
+    <string name="ui_in_min">Dans %1$s min</string>
+    <string name="ui_with_a_sound" formatted="false">Avec sonnerie</string>
+    <string name="ui_quiet_nudge" formatted="false">Petit signe</string>
+    <string name="ui_monday_to_friday" formatted="false">Du lundi au vendredi</string>
+    <string name="ui_at_the_weekend" formatted="false">Le week-end</string>
+    <string name="ui_over_here" formatted="false">Par ici !</string>
+    <string name="ui_there_is_room_for_what_you_want" formatted="false">Il y a de la place pour tes envies.</string>
+    <string name="ui_with_me" formatted="false">Avec moi</string>
+    <string name="ui_for_today" formatted="false">Pour aujourd’hui</string>
+    <string name="ui_off_i_go" formatted="false">Je file !</string>
+    <string name="ui_my_objects" formatted="false">Mes objets</string>
+    <string name="ui_a_small_ritual_before_what_comes_next" formatted="false">Un petit rituel avant la suite.</string>
+    <string name="ui_sound_preview_10_seconds" formatted="false">On essaie le son · 10 secondes</string>
+    <string name="ui_snooze_for_minutes">Reporter %1$s minutes</string>
+    <string name="ui_fancy_a_little_nudge" formatted="false">Envie d’un petit signe ?</string>
+    <string name="ui_later" formatted="false">Plus tard</string>
+    <string name="ui_invitation_for">Invitation pour %1$s</string>
+    <string name="ui_invitation_paused" formatted="false">Invitation en pause</string>
+    <string name="ui_invitation_needs_permission" formatted="false">Invitation en attente d’autorisation</string>
+    <string name="ui_next_nudge">Prochain signe : %1$s</string>
+    <string name="ui_hide_options_for">Masquer les options de %1$s</string>
+    <string name="ui_options_for">Options de %1$s</string>
+    <string name="ui_quiet_nudge_silent_notification" formatted="false">Petit signe · notification silencieuse</string>
+    <string name="ui_no_sound" formatted="false">Sans son</string>
+    <string name="ui_no_vibration" formatted="false">Sans vibration</string>
+    <string name="ui_customize" formatted="false">Personnaliser</string>
+    <string name="ui_skip_the_next_appointment" formatted="false">Passer le prochain rendez-vous</string>
+    <string name="ui_appearance" formatted="false">Apparence</string>
+    <string name="ui_a_nudge_if_you_want" formatted="false">Un signe, si tu veux</string>
+    <string name="ui_allow_exact_alarms" formatted="false">Autoriser les alarmes exactes</string>
+    <string name="ui_your_notebook_stays_here" formatted="false">Ton carnet reste ici</string>
+    <string name="ui_glasses" formatted="false">Lunettes</string>
+    <string name="ui_transport_card" formatted="false">Carte de transport</string>
+    <string name="ui_laptop" formatted="false">Ordinateur</string>
+    <string name="ui_charger" formatted="false">Chargeur</string>
+    <string name="ui_power_bank" formatted="false">Batterie externe</string>
+    <string name="ui_badge" formatted="false">Badge</string>
+    <string name="ui_tissues" formatted="false">Mouchoirs</string>
+    <string name="ui_outings_travel" formatted="false">Sorties &amp; voyage</string>
+    <string name="ui_sunglasses" formatted="false">Lunettes de soleil</string>
+    <string name="ui_camera" formatted="false">Appareil photo</string>
+    <string name="ui_sports_clothes" formatted="false">Tenue de sport</string>
+    <string name="ui_swimsuit" formatted="false">Maillot de bain</string>
+    <string name="ui_the_little_things" formatted="false">LES PETITES AFFAIRES</string>
+    <string name="ui_a_little_world_of_your_own" formatted="false">Tout un petit monde.</string>
+    <string name="ui_your_essentials_your_wishes_what_comes_with_you" formatted="false">Tes essentiels, tes envies, ce qui vient avec toi.</string>
+    <string name="ui_my_collection">Ma collection · %1$s</string>
+    <string name="ui_clear_search" formatted="false">Effacer la recherche</string>
+    <string name="ui_nothing_under_that_name_for_now" formatted="false">Rien sous ce nom, pour l’instant.</string>
+    <string name="ui_edit">Modifier %1$s</string>
+    <string name="ui_every_day_e8bdcc" formatted="false">Au quotidien</string>
+    <string name="ui_in_my_collection" formatted="false">✓ Dans ma collection</string>
+    <string name="ui_i_ll_bring_it" formatted="false">Je l’emporte</string>
+    <string name="ui_remove" formatted="false">Retirer</string>
+    <string name="ui_keep" formatted="false">Garder</string>
+    <string name="ui_its_name" formatted="false">Son petit nom</string>
+    <string name="ui_an_everyday_companion" formatted="false">Un compagnon du quotidien</string>
+    <string name="ui_it_finds_its_place_every_day" formatted="false">Il retrouve sa place chaque jour.</string>
+    <string name="ui_add" formatted="false">Ajouter</string>
+    <string name="ui_a_quick_check_then_off_you_go_d5575c">%1$s · Un petit tour et tu files.</string>
+    <string name="ui_not_today" formatted="false">Pas aujourd’hui</string>
+    <string name="language_title">Langue</string>
+    <string name="language_help">Choisis la langue des écrans et notifications. Tes textes personnels restent tels que tu les as écrits.</string>
+</resources>

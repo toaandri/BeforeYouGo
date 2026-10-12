@@ -59,7 +59,7 @@ class AppStore(val context: Context) {
                     enabled = value.optBoolean("enabled", true),
                     deliveryMode = value.optString("deliveryMode", DeliveryMode.RING.name).let { runCatching { DeliveryMode.valueOf(it) }.getOrDefault(DeliveryMode.RING) },
                     soundUri = value.optString("sound", "default"),
-                    soundName = value.optString("soundName", "Sonnerie du téléphone"),
+                    soundName = value.optString("soundName", uiText(R.string.ui_phone_ringtone)),
                     vibrate = value.optBoolean("vibrate", true), snoozeMinutes = value.optInt("snooze", 5).coerceIn(1, 30),
                     itemIds = (0 until ids.length()).map { ids.getLong(it) }.toSet(),
                     allItems = value.optBoolean("allItems", true), skipUntil = value.optLong("skipUntil", 0)
@@ -83,4 +83,4 @@ class AppStore(val context: Context) {
     fun setSnoozedUntil(id: Long, millis: Long) = prefs.edit().putLong("snooze_$id", millis).apply()
 }
 
-enum class ThemePreference(val label: String) { SYSTEM("Système"), LIGHT("Clair"), DARK("Sombre") }
+enum class ThemePreference(private val labelResource: Int) { SYSTEM(R.string.ui_follow_system), LIGHT(R.string.ui_light), DARK(R.string.ui_dark); val label: String get() = uiText(labelResource) }
